@@ -11,7 +11,18 @@ if [[ ! $version =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ||
 fi
 
 cat <<NOTES
-## Copy and paste into your AI agent
+## Start in chat
+
+Paste this block into your AI chat or voice-capable agent. It is self-contained.
+
+\`\`\`text
+Use Cronicle $version.
+NOTES
+awk 'BEGIN { markers = 0 } /^---$/ && markers < 2 { markers++; next } markers == 2 { print }' skills/cronicle-chat/SKILL.md
+cat <<NOTES
+\`\`\`
+
+## Optional Docker setup
 
 \`\`\`text
 Use Cronicle $version to manage my tasks and track time.
