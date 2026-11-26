@@ -35,6 +35,9 @@ jobs:
             --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
             --tag "$image:$GITHUB_SHA" \
             --tag "$image:latest" .
+      - name: Check bootstrap prompts
+        run: bash tests/bootstrap.sh
+
       - name: Run container tests
         run: bash tests/container.sh "ghcr.io/${GITHUB_REPOSITORY,,}-cli:latest"
 
@@ -73,6 +76,13 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Pull and execute the published image
+        env:
+          RELEASE_IMAGE: ${{ needs.publish.outputs.release-image }}
+        run: |
+          docker pull "$RELEASE_IMAGE"
+          docker run --rm "$RELEASE_IMAGE" --version | grep -Fx "$GITHUB_REF_NAME"
 
       - name: Create GitHub Release
         env:

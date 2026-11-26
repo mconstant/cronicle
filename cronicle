@@ -13,9 +13,16 @@ if [ ! -e "$HOME/.timewarrior/timewarrior.cfg" ]; then
     touch "$HOME/.timewarrior/timewarrior.cfg"
 fi
 
-if [ "$#" -gt 0 ]; then
-    exec "$@"
-fi
+case "${1:-}" in
+    --help|--version|report|handoff|observe|observation|task-upsert|task-meta|activity|reminder)
+        exec python3 /usr/local/lib/cronicle/ledger.py "$@"
+        ;;
+    '')
+        ;;
+    *)
+        exec "$@"
+        ;;
+esac
 
 tmux new-session -d -s cronicle 'watch -n 2 timew summary'
 tmux split-window -v -t cronicle 'tasksh; tmux kill-session -t cronicle'

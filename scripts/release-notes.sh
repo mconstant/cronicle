@@ -21,27 +21,47 @@ NOTES
 awk 'BEGIN { markers = 0 } /^---$/ && markers < 2 { markers++; next } markers == 2 { print }' skills/cronicle-chat/SKILL.md
 cat <<NOTES
 \`\`\`
+NOTES
 
-## Optional Docker setup
-
+docker_prompt() {
+    local variant=$1
+    printf '\n## %s\n\n' "$variant"
+    cat <<NOTES
 \`\`\`text
 Use Cronicle $version to manage my tasks and track time.
 Load the skill from $source_url/skills/cronicle/SKILL.md.
 Use the Docker image $image.
 
+Check Docker access from your shell with docker version --format '{{.Server.Version}}'.
 If Cronicle is already running, check its image and ask before replacing it.
-Keep my task and time data in the existing volume and back it up before
-switching versions. For a new setup, ask before starting this container:
+Back up and preserve the existing cronicle-data volume before switching versions.
+Ask before starting a new installation:
 
 docker run --rm -it --name cronicle -v cronicle-data:/data $image
 
-Before setup, check whether your own shell can reach Docker with
-docker version --format '{{.Server.Version}}'.
-If Docker is unavailable, offer a conversation-only trial or give me the
-run command for a persistent Docker host. Say where data is actually saved.
-Use a reminder or calendar integration only if you have confirmed access.
-Show native terminal reports in chat and summarize them in voice.
-If I haven’t made a request yet, ask if I want to work on a task, catch you
-up on what's underway, or enter Ambient Mode. Follow the skill for my choice.
-\`\`\`
+Verify Docker setup and persistence before reporting success. If Docker is
+unavailable, offer the Start in chat prompt or give me the command for a
+persistent Docker host. Show native reports in chat and summarize them in
+voice. Confirm changes and reminders only after successful execution.
+If I haven't given you a task, offer a ready action or ask what I want to
+accomplish today.
 NOTES
+    if [[ $variant == 'Developer Mode bootstrap' ]]; then
+        cat <<'NOTES'
+
+Enable Developer Mode alongside normal operation. Quietly persist bugs,
+limitations, feature requests, workflow friction, corrections, and
+improvement suggestions. Distinguish my explicit feedback from your
+recommendations. Verify persistence before confirming. On request, generate
+a self-contained Markdown engineering handoff with priorities, supporting
+observations, recommendations, and acceptance criteria. For a requested
+release handoff, include implementation, test, build, publication, and
+verification steps for the requested version. Generating a handoff itself
+does not edit source code or publish a release.
+NOTES
+    fi
+    printf '\x60\x60\x60\n'
+}
+
+docker_prompt 'Standard bootstrap'
+docker_prompt 'Developer Mode bootstrap'

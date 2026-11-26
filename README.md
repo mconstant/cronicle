@@ -5,6 +5,20 @@ and paste the **Start in chat** block into an AI chat or voice-capable agent.
 It includes the full instructions and keeps tasks in the conversation. Say
 “Export Cronicle” to carry a snapshot to another chat.
 
+## Share Cronicle
+
+**Standard**
+
+```text
+Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and track time. Read the README and follow the latest stable release's installation and skill instructions.
+```
+
+**Developer Mode**
+
+```text
+Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and track time. Read the README, follow the latest stable release's installation instructions, and enable Developer Mode to continuously capture improvements and generate Markdown development handoffs on request.
+```
+
 ## Optional Docker setup
 
 The Docker version pairs Taskwarrior and Timewarrior in a persistent volume.
@@ -81,6 +95,19 @@ timer and leaves the task open. “Mark the stuffing complete” closes it.
 
 Use the [developer handoff](docs/development-handoff.md) to pick up Cronicle
 work in a new coding-agent session, including by voice.
+
+## Helper Mode and Developer Mode
+
+Say “Enter Helper Mode” to quietly apply well-supported updates as work
+happens. Ambient Mode holds changes for exit review. Developer Mode is
+independent and keeps improvement observations separate from tasks.
+See the [command guide and Thanksgiving trial](docs/coordination.md).
+
+Cronicle adds a SQLite file in the existing volume for coordination metadata,
+reminder receipts, parallel activities, and observations. Taskwarrior and
+Timewarrior keep their native files. Back up the volume before upgrading.
+Older images can still read tasks and tracked time, while v1 metadata
+requires a v1 image.
 
 ## MVP voice opening
 
