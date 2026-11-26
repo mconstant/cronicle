@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+mkdir -p "$HOME/.task/hooks" "$HOME/.timewarrior/data"
+if [ ! -e "$HOME/.taskrc" ]; then
+    printf 'data.location=%s/.task\n' "$HOME" > "$HOME/.taskrc"
+fi
+if [ ! -e "$HOME/.task/hooks/on-modify.timewarrior" ]; then
+    install -m 0755 /usr/share/doc/timewarrior/ext/on-modify.timewarrior \
+        "$HOME/.task/hooks/on-modify.timewarrior"
+fi
+if [ ! -e "$HOME/.timewarrior/timewarrior.cfg" ]; then
+    touch "$HOME/.timewarrior/timewarrior.cfg"
+fi
+
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
+tmux new-session -d -s cronicle 'watch -n 2 timew summary'
+tmux split-window -v -t cronicle 'tasksh; tmux kill-session -t cronicle'
+exec tmux attach-session -t cronicle
