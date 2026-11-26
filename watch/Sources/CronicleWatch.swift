@@ -48,7 +48,6 @@ private struct WatchHome: View {
                                 Text(active.startedAt, style: .timer)
                                     .monospacedDigit()
                                     .foregroundStyle(.secondary)
-                                    .accessibilityLabel("Elapsed time")
                             }
                             Button("Stop timer", systemImage: "stop.fill") {
                                 update { $0.stop(at: .now) }
@@ -59,7 +58,11 @@ private struct WatchHome: View {
                         }
                     }
                     Section("Tasks") {
-                        TextField("New task", text: $title)
+                        TextField(
+                            "New task",
+                            text: $title,
+                            prompt: Text("New task").foregroundColor(.primary)
+                        )
                             .submitLabel(.done)
                             .onSubmit(addTask)
                         if !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
