@@ -82,6 +82,11 @@ When you ask “What can I do now?”, Cronicle lists actions that are ready.
 “I'm making the stuffing now” starts timing. “I'm done for now” stops the
 timer and leaves the task open. “Mark the stuffing complete” closes it.
 
+## Continue development
+
+Use the [developer handoff](docs/development-handoff.md) to pick up Cronicle
+work in a new coding-agent session, including by voice.
+
 ## MVP acceptance scenarios
 
 Use disposable test data in a Thanksgiving project.
