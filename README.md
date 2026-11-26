@@ -25,22 +25,33 @@ running container as Tasksh. Voice depends on the agent's own voice interface.
 
 ## Copy and paste into your AI agent
 
+Open the [latest tested release](https://github.com/mconstant/cronicle/releases/latest)
+and copy its prompt. Each release pins the skill to its Git commit and the
+container to its image digest. Until the first release is published, use this
+CI-tested snapshot.
+
 ```text
-Use Cronicle to help me manage tasks and track time. Read the README and
-skills/cronicle/SKILL.md at https://github.com/mconstant/cronicle.
+Use Cronicle to manage my tasks and track time. Load the skill from
+https://github.com/mconstant/cronicle/blob/4837edbb5614dd998970c2f0f47834aba3df2ffd/skills/cronicle/SKILL.md
+and use this Docker image:
+ghcr.io/mconstant/cronicle-cli@sha256:063e7b69cec4354ba8d2f52b9a7b3792e5fbeeb928e808c942cd9db39bf9ce4e
 
-If you have shell access and can reach Docker, look for my existing Cronicle
-container and use it. If I haven't set one up yet, walk me through the README's
-setup or ask before building and starting the container. Keep my tasks and time
-history in the persistent cronicle-data volume.
-
-Use the skill to interpret everyday requests like “I'm making stuffing now,”
-“I'm done with stuffing,” or “How long did I spend on it?” Ask when the task is
-ambiguous. When I ask for a terminal report, use the skill's native commands.
-Show the output verbatim in chat and summarize it conversationally in voice.
-If you don't have shell or Docker access, tell me and give me the commands
-to run.
+If Cronicle is already running, check its image and ask before replacing it.
+Keep my data in the existing volume and back it up before switching versions.
+For a new setup, ask before starting Cronicle with docker run --rm -it
+--name cronicle -v cronicle-data:/data and the pinned image above.
+Show native terminal reports in chat and summarize them in voice.
 ```
+
+To roll back, pick an older version from [GitHub Releases](https://github.com/mconstant/cronicle/releases).
+Check its data compatibility notes and back up your volume before
+recreating the container with that release's prompt.
+
+Maintainers publish by pushing a `vMAJOR.MINOR.PATCH` tag. The workflow
+tests the image, pushes the version tag to the registry, and then creates
+the GitHub Release. During the 0.x series, use patch releases for fixes
+and minor releases for features or breaking changes. Document breaking
+changes and data compatibility in the release notes.
 
 The prompt works as instructions in any chat. To act on your tasks, the agent
 needs access to the host running Cronicle and permission to use Docker.
