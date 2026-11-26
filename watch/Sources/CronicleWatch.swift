@@ -16,10 +16,8 @@ private struct WatchHome: View {
         let key = "cronicle.ledger"
         var defaults = UserDefaults.standard
         #if DEBUG
-        let arguments = ProcessInfo.processInfo.arguments
-        if let index = arguments.firstIndex(of: "--test-ledger"),
-           arguments.indices.contains(index + 1),
-           let testDefaults = UserDefaults(suiteName: "cronicle-test-" + arguments[index + 1]) {
+        if let suite = ProcessInfo.processInfo.environment["CRONICLE_TEST_LEDGER"],
+           let testDefaults = UserDefaults(suiteName: "cronicle-test-" + suite) {
             defaults = testDefaults
             if defaults.data(forKey: key) == nil {
                 var fixture = WatchLedger()
@@ -74,12 +72,14 @@ private struct WatchHome: View {
                             } label: {
                                 Text(task.title)
                             }
+                            .accessibilityIdentifier("open-task-" + task.title)
                         }
                     }
                     if ledger.tasks.contains(where: \.done) {
                         Section("Completed") {
                             ForEach(ledger.tasks.filter(\.done)) { task in
                                 Text(task.title)
+                                    .accessibilityIdentifier("completed-task-" + task.title)
                             }
                         }
                     }
@@ -105,6 +105,7 @@ private struct WatchHome: View {
                 }
                 if task.done {
                     Label("Completed", systemImage: "checkmark.circle")
+                        .accessibilityIdentifier("task-completed")
                 } else if ledger?.active?.id == id {
                     Button("Stop timer", systemImage: "stop.fill") {
                         update { $0.stop(at: .now) }
