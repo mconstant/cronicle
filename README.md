@@ -90,6 +90,15 @@ timer and leaves the task open. “Mark the stuffing complete” closes it.
 Use the [developer handoff](docs/development-handoff.md) to pick up Cronicle
 work in a new coding-agent session, including by voice.
 
+## MVP voice opening
+
+The development skill offers three ways to begin: work on a task now,
+say “Catch up with me” to review work already underway, or say “Enter
+Ambient Mode” to collect possibilities during the session. Catch-up and
+Ambient Mode read back proposed changes for approval before applying
+them. Try this flow with the skill in your development checkout. The
+pinned fallback above uses an earlier skill.
+
 ## MVP acceptance scenarios
 
 Use disposable test data in a Thanksgiving project.
@@ -119,3 +128,40 @@ Use disposable test data in a Thanksgiving project.
    Timewarrior. The task stays open. Ask for the terminal report and verify
    the native table appears in chat when available and the spoken response
    uses ordinary language.
+
+6. **Ambient Mode.** In a voice host that delivers speech during an open
+   session, say “Enter Ambient Mode.” Say “I still need to buy foil,” then
+   say to someone else, “Can you get the leash?” Verify the task list and
+   timers remain unchanged while Ambient Mode is on. Say “Exit Ambient
+   Mode.” Cronicle should propose buying foil and leave out the request
+   addressed to someone else. Approve the foil task and verify it appears
+   once. Repeat with an empty batch, then with two proposals and approval
+   for only one. Verify a pending proposal stays unapplied if you end the
+   session before review.
+
+7. **Catch up.** Open Cronicle without a request and verify it offers all
+   three ways to begin. Say “Catch me up” and verify it asks what's going
+   on today. Start with “I'm working on the turkey.” Give the details in
+   response to follow-ups, including that you found the brining bag, still
+   need buttermilk and salt before brining, and are walking the dog now.
+   Verify Cronicle asks about missing details one at a time. Mention that
+   guests are coming without giving a time. Verify it asks when they arrive
+   and uses that answer to surface any prep or timing gaps. It should check
+   for anything else in play before reading back the batch. Approve only the
+   prerequisite. Verify no timer starts and no task is marked complete.
+   Repeat with a known earlier start and verify any approved backfill
+   against Timewarrior.
+
+8. **Start the workday.** Say “I'm starting my workday.” Verify Cronicle
+   asks what needs attention today. Mention performance evaluations due
+   December 1 and a separate commitment for today. Verify it follows up
+   about what's left, any missing input or review, and which action you
+   can take first. It should keep both commitments in view, preserve the
+   December 1 deadline, and read back a proposed plan before saving it.
+
+9. **Open-session reminder.** In a voice host with a session scheduler,
+   say “Remind me in one minute to check the turkey.” Verify the host
+   schedules it before Cronicle confirms. Stay silent and verify it speaks
+   once. Set another reminder, end the call, and verify that it expires.
+   In hosts without a scheduler, Cronicle should explain the limit.
+   Cronicle's Docker container does not provide a voice host or scheduler.

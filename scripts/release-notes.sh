@@ -26,6 +26,7 @@ docker run --rm -it --name cronicle -v cronicle-data:/data $image
 
 If you cannot access Docker on the host, give me the commands to run.
 Show native terminal reports in chat and summarize them in voice.
-If I haven’t given you a task yet, follow the skill’s getting-started flow.
+If I haven’t made a request yet, ask if I want to work on a task, catch you
+up on what's underway, or enter Ambient Mode. Follow the skill for my choice.
 \`\`\`
 NOTES
