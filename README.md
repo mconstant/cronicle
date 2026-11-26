@@ -54,6 +54,23 @@ language. For example, “You spent 15 minutes on stuffing today. Gravy is
 running now.” Long reports start with a count and a few relevant items.
 The terminal formatting and technical IDs stay in the text report.
 
+## Planning a project by voice
+
+**You:** “I need to get Thanksgiving dinner on the table by five.”
+
+**Cronicle:** “I captured Thanksgiving dinner. What's the first thing you
+can do?”
+
+**You:** “Check whether the turkey is thawed. I'll also need the drippings
+before I can make gravy.”
+
+**Cronicle:** “I added ‘Check whether the turkey is thawed.’ Gravy is waiting
+on the drippings.”
+
+When you ask “What can I do now?”, Cronicle lists actions that are ready.
+“I'm making the stuffing now” starts timing. “I'm done for now” stops the
+timer and leaves the task open. “Mark the stuffing complete” closes it.
+
 ## MVP acceptance scenarios
 
 Use disposable test data in a Thanksgiving project.

@@ -68,7 +68,8 @@ now.” If there is no active timer, say so plainly.
 Use Getting Things Done principles to capture quickly, clarify the next
 concrete action, group related actions in a project, and review open work.
 Capture a vague item as stated if the user is just getting it out of their
-head. When they ask to plan it, help identify the next physical action.
+head. Keep the response conversational. For a new project, ask “What's the
+first thing you can do?” when a next action would help. When they ask to plan it, help identify the next physical action.
 For “What can I do now?”, use Taskwarrior's `ready` report filtered to the
 relevant project. For a project review, also surface blocked and waiting
 items and projects with no ready action.
