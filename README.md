@@ -36,9 +36,14 @@ history in the persistent cronicle-data volume.
 
 Use the skill to interpret everyday requests like “I'm making stuffing now,”
 “I'm done with stuffing,” or “How long did I spend on it?” Ask when the task is
-ambiguous. If you don't have shell or Docker access, tell me and give me the
-commands to run.
+ambiguous. When I ask for a terminal report, use the skill's native commands
+and show the output verbatim in a plain-text code block. If you don't have
+shell or Docker access, tell me and give me the commands to run.
 ```
 
 The prompt works as instructions in any chat. To act on your tasks, the agent
 needs access to the host running Cronicle and permission to use Docker.
+
+Try “show me the Tasksh task list,” “show all tasks, including completed
+tasks,” or “show today's time report.” Ask for the live time pane to see
+what tmux is displaying in a running interactive session.
