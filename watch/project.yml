@@ -1,0 +1,25 @@
+name: CronicleWatch
+options:
+  deploymentTarget:
+    watchOS: "10.0"
+targets:
+  CronicleWatch:
+    type: application
+    platform: watchOS
+    sources: [Sources]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mconstant.cronicle.watch
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Cronicle
+        INFOPLIST_KEY_WKApplication: YES
+        INFOPLIST_KEY_WKWatchOnly: YES
+        TARGETED_DEVICE_FAMILY: 4
+        SWIFT_VERSION: "5.0"
+        MARKETING_VERSION: "1.1.0"
+        CURRENT_PROJECT_VERSION: 1
+schemes:
+  CronicleWatch:
+    build:
+      targets:
+        CronicleWatch: all
