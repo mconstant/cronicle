@@ -3,6 +3,7 @@ name: Publish container
 on:
   push:
     branches: [main, master]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -11,7 +12,6 @@ permissions:
 
 jobs:
   publish:
-    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
@@ -19,15 +19,22 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Build and publish to GitHub Container Registry
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build container
         run: |
           image="ghcr.io/${GITHUB_REPOSITORY,,}-cli"
           docker build \
             --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
             --tag "$image:$GITHUB_SHA" \
             --tag "$image:latest" .
+      - name: Run container tests
+        run: bash tests/container.sh "ghcr.io/${GITHUB_REPOSITORY,,}-cli:latest"
+
+      - name: Publish to GitHub Container Registry
+        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}-cli"
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
           docker push "$image:$GITHUB_SHA"
           docker push "$image:latest"
