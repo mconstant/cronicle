@@ -12,6 +12,9 @@ device=$(xcrun simctl list devices available -j | jq -er '
 xcrun simctl boot "$device"
 xcrun simctl bootstatus "$device" -b
 xcodebuild -project CronicleWatch.xcodeproj -scheme CronicleWatch \
+  -sdk watchsimulator -destination "id=$device" -parallel-testing-enabled NO \
+  -derivedDataPath build/derived CODE_SIGNING_ALLOWED=NO test -quiet
+xcodebuild -project CronicleWatch.xcodeproj -scheme CronicleWatch \
   -configuration Release -sdk watchsimulator -destination "id=$device" \
   -derivedDataPath build/derived CODE_SIGNING_ALLOWED=NO build -quiet
 app="$PWD/build/derived/Build/Products/Release-watchsimulator/CronicleWatch.app"
