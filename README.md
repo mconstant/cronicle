@@ -20,31 +20,20 @@ Container Registry.
 
 Install the [Cronicle skill](skills/cronicle/SKILL.md) by copying its directory
 into your agent's skills directory. For Codex, use `~/.agents/skills/cronicle`.
-An agent with shell tools and Docker access can then work with the same
-running container as Tasksh. Voice depends on the agent's own voice interface.
+A coding agent can work with the same running container as Tasksh when its
+shell can reach the Docker daemon on your machine.
 
 ## Copy and paste into your AI agent
 
-Open the [latest tested release](https://github.com/mconstant/cronicle/releases/latest)
-and copy its prompt. Each release pins the skill to its Git commit and the
-container to its image digest. Until the first release is published, use this
-CI-tested snapshot.
+Open the [latest release](https://github.com/mconstant/cronicle/releases/latest)
+and copy the prompt from its release notes. It pins both the skill and image.
 
-```text
-Use Cronicle to manage my tasks and track time. Load the skill from
-https://github.com/mconstant/cronicle/blob/4837edbb5614dd998970c2f0f47834aba3df2ffd/skills/cronicle/SKILL.md
-and use this Docker image:
-ghcr.io/mconstant/cronicle-cli@sha256:063e7b69cec4354ba8d2f52b9a7b3792e5fbeeb928e808c942cd9db39bf9ce4e
-
-If Cronicle is already running, check its image and ask before replacing it.
-Keep my data in the existing volume and back it up before switching versions.
-For a new setup, ask before starting Cronicle with docker run --rm -it
---name cronicle -v cronicle-data:/data and the pinned image above.
-Show native terminal reports in chat and summarize them in voice.
-If I haven’t given you a task yet, offer a ready action or ask what I want
-to get done today. If I just say “Dentist,” ask “Is that an appointment?”
-Confirm reminders only after they’ve actually been scheduled.
-```
+Check Docker access from the agent's own shell with
+`docker version --format '{{.Server.Version}}'`. A mobile chat or a cloud
+workspace may be able to read the skill and still be unable to reach your
+Docker daemon. If the check fails, use a coding agent on the Docker host
+or use Cronicle conversationally for a trial. A conversation-only trial
+keeps its notes in the chat.
 
 To roll back, pick an older version from [GitHub Releases](https://github.com/mconstant/cronicle/releases).
 Check its data compatibility notes and back up your volume before
@@ -55,9 +44,6 @@ tests the image, pushes the version tag to the registry, and then creates
 the GitHub Release. During the 0.x series, use patch releases for fixes
 and minor releases for features or breaking changes. Document breaking
 changes and data compatibility in the release notes.
-
-The prompt works as instructions in any chat. To act on your tasks, the agent
-needs access to the host running Cronicle and permission to use Docker.
 
 Try “show me the Tasksh task list,” “show all tasks, including completed
 tasks,” or “show today's time report.” Ask for the live time pane to see
@@ -96,8 +82,7 @@ The development skill offers three ways to begin: work on a task now,
 say “Catch up with me” to review work already underway, or say “Enter
 Ambient Mode” to collect possibilities during the session. Catch-up and
 Ambient Mode read back proposed changes for approval before applying
-them. Try this flow with the skill in your development checkout. The
-pinned fallback above uses an earlier skill.
+them. Try this flow with the skill in your development checkout.
 
 ## MVP acceptance scenarios
 

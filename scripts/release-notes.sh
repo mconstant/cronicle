@@ -24,7 +24,11 @@ switching versions. For a new setup, ask before starting this container:
 
 docker run --rm -it --name cronicle -v cronicle-data:/data $image
 
-If you cannot access Docker on the host, give me the commands to run.
+Before setup, check whether your own shell can reach Docker with
+docker version --format '{{.Server.Version}}'.
+If Docker is unavailable, offer a conversation-only trial or give me the
+run command for a persistent Docker host. Say where data is actually saved.
+Use a reminder or calendar integration only if you have confirmed access.
 Show native terminal reports in chat and summarize them in voice.
 If I haven’t made a request yet, ask if I want to work on a task, catch you
 up on what's underway, or enter Ambient Mode. Follow the skill for my choice.
