@@ -41,6 +41,9 @@ Keep my data in the existing volume and back it up before switching versions.
 For a new setup, ask before starting Cronicle with docker run --rm -it
 --name cronicle -v cronicle-data:/data and the pinned image above.
 Show native terminal reports in chat and summarize them in voice.
+If I haven’t given you a task yet, offer a ready action or ask what I want
+to get done today. If I just say “Dentist,” ask “Is that an appointment?”
+Confirm reminders only after they’ve actually been scheduled.
 ```
 
 To roll back, pick an older version from [GitHub Releases](https://github.com/mconstant/cronicle/releases).
