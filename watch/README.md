@@ -32,6 +32,6 @@ TestFlight, and App Store distribution require an Apple-signed build.
 ## Build and test
 
 With Xcode and XcodeGen installed, run `bash watch/qa.sh` from the repository.
-QA runs the ledger tests, builds the app, installs and launches it on
+QA runs ledger and interaction tests, builds the app, installs and launches it on
 a watchOS simulator, and captures a screenshot. The ledger tests cover
 duplicate capture, timer switches, completion, and restore from storage.

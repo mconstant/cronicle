@@ -8,9 +8,28 @@ struct ChronicleWatchApp: App {
 }
 
 private struct WatchHome: View {
-    @AppStorage("cronicle.ledger") private var storage = Data()
+    @AppStorage private var storage: Data
     @State private var title = ""
     @State private var error = false
+
+    init() {
+        let key = "cronicle.ledger"
+        var defaults = UserDefaults.standard
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if let index = arguments.firstIndex(of: "--test-ledger"),
+           arguments.indices.contains(index + 1),
+           let testDefaults = UserDefaults(suiteName: "cronicle-test-" + arguments[index + 1]) {
+            defaults = testDefaults
+            if defaults.data(forKey: key) == nil {
+                var fixture = WatchLedger()
+                fixture.add("Collect probes")
+                defaults.set(try? JSONEncoder().encode(fixture), forKey: key)
+            }
+        }
+        #endif
+        _storage = AppStorage(wrappedValue: Data(), key, store: defaults)
+    }
 
     private var ledger: WatchLedger? {
         if storage.isEmpty { return WatchLedger() }
