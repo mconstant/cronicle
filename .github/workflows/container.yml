@@ -71,6 +71,7 @@ jobs:
       - name: Check out source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Create GitHub Release
@@ -80,4 +81,13 @@ jobs:
         run: |
           source_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/$GITHUB_SHA"
           bash scripts/release-notes.sh "$GITHUB_REF_NAME" "$source_url" "$RELEASE_IMAGE" > "$RUNNER_TEMP/release-notes.md"
-          gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --notes-file "$RUNNER_TEMP/release-notes.md"
+          previous=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName // empty')
+          range="$GITHUB_SHA"
+          if [[ -n "$previous" ]] && git merge-base --is-ancestor "$previous" "$GITHUB_SHA"; then
+            range="$previous..$GITHUB_SHA"
+          fi
+          {
+            printf '\n## Changelog\n\n'
+            git log --format='### %s%n%nCommit: `%H` · Author: %an%n%n%b' "$range"
+          } >> "$RUNNER_TEMP/release-notes.md"
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md"

@@ -51,3 +51,11 @@ a release unless I've authorized it.
 After a development session, update this digest when a decision or a pending
 check changes. Keep account details, credentials, and raw voice transcripts
 out of the public handoff.
+
+## Commit and release notes
+
+Use Conventional Commit subjects, such as `feat(skill): explain blocked tasks`
+or `fix(container): include the Timewarrior hook`. For user-facing changes,
+add a body explaining why the change was made. The pull request check
+validates new commits. GitHub Releases include the commit hash, Git author,
+subject, and any body since the preceding release.
