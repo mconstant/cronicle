@@ -89,3 +89,14 @@ Use disposable test data in a Thanksgiving project.
    tagged with the task and Thanksgiving. The weekly total rises by 30
    minutes if the interval falls in that week, and the task status stays
    the same.
+4. **Interactive tmux display.** Pull the published image and launch it
+   interactively with a fresh test volume. Verify Tasksh opens below the
+   live Timewarrior summary. Add a task in Tasksh, start it, and verify
+   the upper pane updates. Stop it and verify the recorded duration appears.
+5. **Live voice handoff.** Load the README prompt in a voice-capable agent
+   with access to the same running container. Say “I'm making the stuffing
+   now,” verify Tasksh shows it as active, then stop it from Tasksh. Ask
+   “How long did I spend on stuffing?” and verify the spoken answer matches
+   Timewarrior. The task stays open. Ask for the terminal report and verify
+   the native table appears in chat when available and the spoken response
+   uses ordinary language.
