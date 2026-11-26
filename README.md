@@ -1,8 +1,14 @@
 # Cronicle
 
-Cronicle pairs Taskwarrior and Timewarrior in a Docker container. Its terminal
-opens a live time summary above Tasksh. Both tools store their data in a single
-Docker volume.
+Cronicle works directly in chat. Open the [latest release](https://github.com/mconstant/cronicle/releases/latest)
+and paste the **Start in chat** block into an AI chat or voice-capable agent.
+It includes the full instructions and keeps tasks in the conversation. Say
+“Export Cronicle” to carry a snapshot to another chat.
+
+## Optional Docker setup
+
+The Docker version pairs Taskwarrior and Timewarrior in a persistent volume.
+Its terminal opens a live time summary above Tasksh.
 
 ```sh
 docker build -t cronicle .
@@ -23,7 +29,7 @@ into your agent's skills directory. For Codex, use `~/.agents/skills/cronicle`.
 A coding agent can work with the same running container as Tasksh when its
 shell can reach the Docker daemon on your machine.
 
-## Copy and paste into your AI agent
+## Connect a coding agent to Docker
 
 Open the [latest release](https://github.com/mconstant/cronicle/releases/latest)
 and copy the prompt from its release notes. It pins both the skill and image.
@@ -164,3 +170,8 @@ Use disposable test data in a Thanksgiving project.
     Ask what's next. Verify that Cronicle keeps packing after inspection,
     distinguishes the estimate from the pickup deadline, and presents
     any proposed change separately for approval.
+
+11. **Chat-only handoff.** Paste the release's Start in chat prompt into a
+    chat without tools. Add a task, record a reported duration, then export
+    Cronicle. Paste the prompt and snapshot into a new chat. Verify the task
+    and duration are restored without a Docker setup step.
