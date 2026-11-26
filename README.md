@@ -53,3 +53,22 @@ In voice, Cronicle reads task names, statuses, and durations in plain
 language. For example, “You spent 15 minutes on stuffing today. Gravy is
 running now.” Long reports start with a count and a few relevant items.
 The terminal formatting and technical IDs stay in the text report.
+
+## MVP acceptance scenarios
+
+Use disposable test data in a Thanksgiving project.
+
+1. **“What can I do for Thanksgiving now?”** Make gravy depend on getting the
+   turkey drippings. The ready list includes the drippings and skips gravy.
+   “What's blocking the gravy?” names the drippings. Stopping the drippings
+   timer leaves gravy blocked. Completing the drippings makes gravy ready
+   if its other prerequisites and scheduling allow it.
+2. **“How much time did I spend on Thanksgiving this week?”** Record timed
+   Thanksgiving work through Taskwarrior and add a separate interval in
+   another project. The spoken total matches the Timewarrior weekly
+   summary filtered to Thanksgiving and excludes the other project.
+3. **“I forgot to log the half hour I spent on gravy.”** The agent asks when
+   it happened, checks for overlap, then records one 30-minute interval
+   tagged with the task and Thanksgiving. The weekly total rises by 30
+   minutes if the interval falls in that week, and the task status stays
+   the same.

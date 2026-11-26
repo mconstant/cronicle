@@ -62,3 +62,35 @@ of `1:05:00`. If a command fails, explain what happened in plain language.
 
 For example, say “You spent 15 minutes on stuffing today. Gravy is running
 now.” If there is no active timer, say so plainly.
+
+## Next actions and prerequisites
+
+Use Getting Things Done principles to capture quickly, clarify the next
+concrete action, group related actions in a project, and review open work.
+Capture a vague item as stated if the user is just getting it out of their
+head. When they ask to plan it, help identify the next physical action.
+For “What can I do now?”, use Taskwarrior's `ready` report filtered to the
+relevant project. For a project review, also surface blocked and waiting
+items and projects with no ready action.
+
+For “Get the drippings before making gravy” or “Gravy needs the drippings,”
+resolve both tasks by UUID and set the drippings as a dependency of gravy.
+Ask which task the user means if either is ambiguous. If a missing task
+is clearly part of the request, create it and use its UUID. Preserve other
+prerequisites and verify the resulting dependency list. Explain the
+direction in plain language. “Gravy is waiting on the turkey drippings.”
+
+Reject self-dependencies and cycles. For “Why can't I make gravy yet?”,
+read the task's dependencies and name the unfinished prerequisites.
+Before starting a blocked task, explain what's in the way and let the
+user decide how to proceed. Completing the last prerequisite unblocks the
+dependent task. Stopping its timer leaves the dependency in place.
+
+## Project time and backfill
+
+For a project total, use a Timewarrior summary filtered by the recorded
+project tag and date range, such as `timew summary :week Thanksgiving`.
+The Taskwarrior hook supplies the project tag for tracked tasks. If the
+user forgot to track an interval, clarify when it happened, check for
+overlap, and use `timew track` with the task description and project tags.
+Verify the report afterward. Backfilling time leaves task status as-is.
