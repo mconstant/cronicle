@@ -8,12 +8,14 @@ struct ChronicleWatchApp: App {
 }
 
 private struct WatchHome: View {
-    @AppStorage private var storage: Data
+    private let defaults: UserDefaults
+    private let key = "cronicle.ledger"
+    @State private var ledger: WatchLedger?
+    @State private var path: [UUID] = []
     @State private var title = ""
     @State private var error = false
 
     init() {
-        let key = "cronicle.ledger"
         var defaults = UserDefaults.standard
         #if DEBUG
         if let suite = ProcessInfo.processInfo.environment["CRONICLE_TEST_LEDGER"],
@@ -26,16 +28,13 @@ private struct WatchHome: View {
             }
         }
         #endif
-        _storage = AppStorage(wrappedValue: Data(), key, store: defaults)
-    }
-
-    private var ledger: WatchLedger? {
-        if storage.isEmpty { return WatchLedger() }
-        return try? JSONDecoder().decode(WatchLedger.self, from: storage)
+        self.defaults = defaults
+        let stored = defaults.data(forKey: key)
+        _ledger = State(initialValue: stored.map { try? JSONDecoder().decode(WatchLedger.self, from: $0) } ?? WatchLedger())
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             if let ledger {
                 List {
                     if let active = ledger.active,
@@ -50,6 +49,7 @@ private struct WatchHome: View {
                             Button("Stop timer", systemImage: "stop.fill") {
                                 update { $0.stop(at: .now) }
                             }
+                            .accessibilityIdentifier("stop-timer")
                             Button("Mark complete", systemImage: "checkmark.circle") {
                                 update { $0.complete(task.id, at: .now) }
                             }
@@ -67,9 +67,7 @@ private struct WatchHome: View {
                             Button("Add task", systemImage: "plus", action: addTask)
                         }
                         ForEach(ledger.tasks.filter { !$0.done && $0.id != ledger.active?.id }) { task in
-                            NavigationLink {
-                                taskDetail(task.id)
-                            } label: {
+                            NavigationLink(value: task.id) {
                                 Text(task.title)
                             }
                             .accessibilityIdentifier("open-task-" + task.title)
@@ -85,6 +83,7 @@ private struct WatchHome: View {
                     }
                 }
                 .navigationTitle("Cronicle")
+                .navigationDestination(for: UUID.self) { id in taskDetail(id) }
             } else {
                 Text("Saved tasks couldn’t be read.")
                     .navigationTitle("Cronicle")
@@ -103,21 +102,12 @@ private struct WatchHome: View {
                     Text(Duration.seconds(task.seconds).formatted(.units(allowed: [.hours, .minutes, .seconds], width: .abbreviated)))
                         .foregroundStyle(.secondary)
                 }
-                if task.done {
-                    Label("Completed", systemImage: "checkmark.circle")
-                        .accessibilityIdentifier("task-completed")
-                } else if ledger?.active?.id == id {
-                    Button("Stop timer", systemImage: "stop.fill") {
-                        update { $0.stop(at: .now) }
-                    }
-                } else {
-                    Button(ledger?.active == nil ? "Start timer" : "Switch timer", systemImage: "play.fill") {
-                        update { $0.start(id, at: .now) }
-                    }
-                }
                 if !task.done {
+                    Button(ledger?.active == nil ? "Start timer" : "Switch timer", systemImage: "play.fill") {
+                        if update({ $0.start(id, at: .now) }) { path.removeAll() }
+                    }
                     Button("Mark complete", systemImage: "checkmark.circle") {
-                        update { $0.complete(id, at: .now) }
+                        if update({ $0.complete(id, at: .now) }) { path.removeAll() }
                     }
                 }
             }
@@ -134,7 +124,8 @@ private struct WatchHome: View {
         guard var state = ledger else { return false }
         _ = change(&state)
         do {
-            storage = try JSONEncoder().encode(state)
+            defaults.set(try JSONEncoder().encode(state), forKey: key)
+            ledger = state
             return true
         } catch {
             self.error = true
