@@ -64,9 +64,30 @@ jobs:
           pinned=$(docker image inspect "$image:$GITHUB_REF_NAME" --format '{{index .RepoDigests 0}}')
           printf 'image=%s\n' "$pinned" >> "$GITHUB_OUTPUT"
 
+  watch:
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Select Xcode and install XcodeGen
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.5.app
+          brew install xcodegen
+      - name: Build and test the watchOS simulator app
+        run: bash watch/qa.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cronicle-watch
+          path: |
+            watch/build/cronicle-watch-simulator.zip
+            watch/build/cronicle-watch.png
+          if-no-files-found: error
+
   release:
     if: github.ref_type == 'tag'
-    needs: publish
+    needs: [publish, watch]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -84,6 +105,11 @@ jobs:
           docker pull "$RELEASE_IMAGE"
           docker run --rm "$RELEASE_IMAGE" --version | grep -Fx "$GITHUB_REF_NAME"
 
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: cronicle-watch
+          path: watch-artifacts
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,4 +126,5 @@ jobs:
             printf '\n## Changelog\n\n'
             git log --format='### %s%n%nCommit: `%H` · Author: %an%n%n%b' "$range"
           } >> "$RUNNER_TEMP/release-notes.md"
-          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md"
+          printf '\n## Apple Watch MVP\n\nThe attached ZIP runs in a watchOS simulator. See [Watch setup](%s/watch/README.md).\n' "$source_url" >> "$RUNNER_TEMP/release-notes.md"
+          gh release create "$GITHUB_REF_NAME" watch-artifacts/cronicle-watch-simulator.zip watch-artifacts/cronicle-watch.png --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md"

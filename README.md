@@ -19,6 +19,11 @@ Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and t
 Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and track time. Read the README, follow the latest stable release's installation instructions, and enable Developer Mode to continuously capture improvements and generate Markdown development handoffs on request.
 ```
 
+## Apple Watch
+
+The [Watch MVP](watch/README.md) captures tasks and tracks one active timer
+offline. The release includes a watchOS simulator build.
+
 ## Optional Docker setup
 
 The Docker version pairs Taskwarrior and Timewarrior in a persistent volume.
