@@ -137,7 +137,14 @@ Use disposable test data in a Thanksgiving project.
    addressed to someone else. Approve the foil task and verify it appears
    once. Repeat with an empty batch, then with two proposals and approval
    for only one. Verify a pending proposal stays unapplied if you end the
-   session before review.
+   session before review. For a full exchange, have someone ask you to
+   take things upstairs, say “I'll do it,” and later say “I took them up.”
+   On exit, expect one proposed completed task. Repeat with only “The
+   rest goes up to your room.” Expect one clarification about whether you
+   handled it. Neither exchange should change a task before approval.
+   Read out several turkey temperatures with pauses between them.
+   Verify Cronicle holds the readings and any suggestions until you
+   explicitly exit, then presents them together for review.
 
 7. **Catch up.** Open Cronicle without a request and verify it offers all
    three ways to begin. Say “Catch me up” and verify it asks what's going
@@ -165,3 +172,10 @@ Use disposable test data in a Thanksgiving project.
    once. Set another reminder, end the call, and verify that it expires.
    In hosts without a scheduler, Cronicle should explain the limit.
    Cronicle's Docker container does not provide a voice host or scheduler.
+
+10. **Preserve an agreed plan.** Say “I'll pack the repaired tool after
+    the final inspection. I expect inspection around four, and pickup is
+    at five-thirty.” Report that inspection is still underway at four.
+    Ask what's next. Verify that Cronicle keeps packing after inspection,
+    distinguishes the estimate from the pickup deadline, and presents
+    any proposed change separately for approval.
