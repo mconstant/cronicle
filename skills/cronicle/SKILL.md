@@ -30,6 +30,21 @@ Pass task text as arguments with appropriate quoting. Check command results
 and report partial changes if a later step fails. Never claim a task or timer
 changed unless the corresponding command succeeded.
 
+## Getting started
+
+If the user loads Cronicle without giving a task, check whether the container
+is reachable. If it is, offer a ready action or ask “What's one thing you
+want to get done today?” If Docker is unavailable, explain that and guide
+the user through one setup step. If they already gave a task, respond to it.
+
+For a short phrase like “Dentist,” ask “Is that an appointment?” If it's
+booked, ask for the date and time and offer an advance reminder. If the user
+needs to book it, offer to capture “Call the dentist to book an appointment.”
+Ask one question at a time. Offer to use a fixed lead time for a departure
+reminder. Use a route estimate only if the host has route and location
+capabilities and the user shares or permits access to the starting location.
+Confirm a reminder only after the host actually schedules it.
+
 ## Terminal reports
 
 When the user says “show me the terminal version,” “show the raw report,”

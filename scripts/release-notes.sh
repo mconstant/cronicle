@@ -26,5 +26,6 @@ docker run --rm -it --name cronicle -v cronicle-data:/data $image
 
 If you cannot access Docker on the host, give me the commands to run.
 Show native terminal reports in chat and summarize them in voice.
+If I haven’t given you a task yet, follow the skill’s getting-started flow.
 \`\`\`
 NOTES
