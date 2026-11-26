@@ -10,23 +10,28 @@ final class WatchFlowTests: XCTestCase {
         XCTAssertTrue(openTask.waitForExistence(timeout: 10), app.debugDescription)
         openTask.tap()
         app.buttons["Start timer"].tap()
-        XCTAssertTrue(app.buttons["Stop timer"].waitForExistence(timeout: 5))
+        let stop = app.descendants(matching: .any)["stop-timer"].firstMatch
+        XCTAssertTrue(stop.waitForExistence(timeout: 8), app.debugDescription)
 
         app.terminate()
         app.launch()
-        XCTAssertTrue(app.buttons["Stop timer"].waitForExistence(timeout: 10))
-        app.buttons["Stop timer"].tap()
-        XCTAssertFalse(app.buttons["Stop timer"].exists)
+        XCTAssertTrue(stop.waitForExistence(timeout: 10), app.debugDescription)
+        stop.tap()
+        XCTAssertTrue(openTask.waitForExistence(timeout: 5))
+        XCTAssertFalse(stop.exists)
 
         openTask.tap()
         let complete = app.buttons["Mark complete"]
         if !complete.isHittable { app.swipeUp() }
         complete.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["task-completed"].firstMatch.waitForExistence(timeout: 5))
+        let completed = app.descendants(matching: .any)["completed-task-Collect probes"].firstMatch
+        if !completed.isHittable { app.swipeUp() }
+        XCTAssertTrue(completed.waitForExistence(timeout: 8), app.debugDescription)
 
         app.terminate()
         app.launch()
-        XCTAssertTrue(app.descendants(matching: .any)["completed-task-Collect probes"].firstMatch.waitForExistence(timeout: 10))
-        XCTAssertFalse(app.buttons["Stop timer"].exists)
+        if !completed.isHittable { app.swipeUp() }
+        XCTAssertTrue(completed.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertFalse(stop.exists)
     }
 }
