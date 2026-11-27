@@ -47,3 +47,26 @@ struct WatchLedger: Codable, Equatable {
         if let index = tasks.firstIndex(where: { $0.id == id }) { tasks[index].done = true }
     }
 }
+
+struct FocusBrief {
+    let running: WatchTask?
+    let next: WatchTask?
+    let completed: Int
+
+    var spoken: String {
+        let current = running.map { "The timer is running for \($0.title)." } ?? "No timer is running."
+        let upcoming = next.map { "Next is \($0.title)." } ?? "No tasks are queued."
+        let finished = completed == 1 ? "1 task complete." : "\(completed) tasks complete."
+        return [current, upcoming, finished].joined(separator: " ")
+    }
+}
+
+extension WatchLedger {
+    var focusBrief: FocusBrief {
+        FocusBrief(
+            running: tasks.first { $0.id == active?.id },
+            next: tasks.first { !$0.done && $0.id != active?.id },
+            completed: tasks.count(where: \.done)
+        )
+    }
+}

@@ -14,6 +14,7 @@ private struct WatchHome: View {
     @State private var path: [UUID] = []
     @State private var title = ""
     @State private var error = false
+    @State private var showingBrief = false
 
     init() {
         var defaults = UserDefaults.standard
@@ -83,6 +84,22 @@ private struct WatchHome: View {
                     }
                 }
                 .navigationTitle("Cronicle")
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            showingBrief = true
+                        } label: {
+                            Label("Focus Brief", systemImage: "list.bullet.rectangle")
+                                .labelStyle(.iconOnly)
+                        }
+                        .accessibilityIdentifier("focus-brief")
+                    }
+                }
+                .sheet(isPresented: $showingBrief) {
+                    FocusBriefView(brief: ledger.focusBrief) { id in
+                        if update({ $0.start(id, at: .now) }) { showingBrief = false }
+                    }
+                }
                 .navigationDestination(for: UUID.self) { id in taskDetail(id) }
             } else {
                 Text("Saved tasks couldn’t be read.")
