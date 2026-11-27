@@ -66,7 +66,7 @@ extension WatchLedger {
         FocusBrief(
             running: tasks.first { $0.id == active?.id },
             next: tasks.first { !$0.done && $0.id != active?.id },
-            completed: tasks.count(where: \.done)
+            completed: tasks.filter(\.done).count
         )
     }
 }
