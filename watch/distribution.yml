@@ -1,0 +1,35 @@
+include:
+  - project.yml
+options:
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  CronicleWatch:
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mconstant.cronicle.watch.watchkitapp
+        PROVISIONING_PROFILE_SPECIFIER: $(CRONICLE_WATCH_PROFILE)
+        SKIP_INSTALL: YES
+  CronicleDistribution:
+    type: application.watchapp2-container
+    platform: iOS
+    dependencies:
+      - target: CronicleWatch
+        embed: true
+        link: false
+        codeSign: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mconstant.cronicle.watch
+        PROVISIONING_PROFILE_SPECIFIER: $(CRONICLE_WRAPPER_PROFILE)
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Cronicle
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SKIP_INSTALL: NO
+        INSTALL_PATH: /Applications
+schemes:
+  CronicleDistribution:
+    build:
+      targets:
+        CronicleDistribution: all

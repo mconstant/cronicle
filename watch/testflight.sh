@@ -1,30 +1,40 @@
 #!/usr/bin/env bash
 set -euo pipefail
 umask 077
-cd "${1:-$(dirname "$0")}"
+script_dir=$(cd "$(dirname "$0")" && pwd)
+cd "${1:-$script_dir}"
+version=${2#v}
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 
 required=(APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY APPLE_DISTRIBUTION_P12_BASE64
-          APPLE_DISTRIBUTION_P12_PASSWORD APPLE_PROVISIONING_PROFILE_BASE64 GITHUB_RUN_NUMBER GITHUB_RUN_ATTEMPT)
+          APPLE_DISTRIBUTION_P12_PASSWORD APPLE_PROVISIONING_PROFILE_BASE64 APPLE_WATCH_PROVISIONING_PROFILE_BASE64
+          GITHUB_RUN_NUMBER GITHUB_RUN_ATTEMPT)
 for name in "${required[@]}"; do
     [[ -n ${!name:-} ]] || { printf 'Missing TestFlight setting: %s\n' "$name" >&2; exit 1; }
 done
 [[ "$ASC_KEY_ID" =~ ^[A-Z0-9]+$ ]]
 tmp=$(mktemp -d)
 keychain="$tmp/signing.keychain-db"
-profile_path=
+profile_paths=()
 cleanup() {
     security delete-keychain "$keychain" 2>/dev/null || true
-    if [[ -n "$profile_path" ]]; then rm -f "$profile_path"; fi
+    for path in "${profile_paths[@]}"; do rm -f "$path"; done
     rm -rf "$tmp"
 }
 trap cleanup EXIT
 
 printf '%s' "$APPLE_DISTRIBUTION_P12_BASE64" | base64 -D > "$tmp/signing.p12"
-printf '%s' "$APPLE_PROVISIONING_PROFILE_BASE64" | base64 -D > "$tmp/app.mobileprovision"
 printf '%s\n' "$ASC_PRIVATE_KEY" > "$tmp/AuthKey_$ASC_KEY_ID.p8"
-security cms -D -i "$tmp/app.mobileprovision" > "$tmp/profile.plist"
 bundle_id=com.mconstant.cronicle.watch
-profile_name=$(python3 - "$tmp/profile.plist" "$APPLE_TEAM_ID" "$bundle_id" <<'PY'
+watch_bundle_id="$bundle_id.watchkitapp"
+profiles="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+mkdir -p "$profiles"
+
+install_profile() {
+    local bundle=$1 secret_name=$2 profile_uuid profile_path
+    printf '%s' "${!secret_name}" | base64 -D > "$tmp/$bundle.mobileprovision"
+    security cms -D -i "$tmp/$bundle.mobileprovision" > "$tmp/$bundle.plist"
+    profile_name=$(python3 - "$tmp/$bundle.plist" "$APPLE_TEAM_ID" "$bundle" <<'PY'
 from datetime import datetime, timezone
 import plistlib
 import sys
@@ -39,15 +49,19 @@ if (team not in profile["TeamIdentifier"]
         or "ProvisionedDevices" in profile
         or profile.get("ProvisionsAllDevices")
         or entitlements.get("get-task-allow")):
-    sys.exit("Profile must be a non-expired App Store profile for the Cronicle Watch bundle and team.")
+    sys.exit("Profile must be a non-expired App Store profile for the requested Cronicle bundle and team.")
 print(profile["Name"])
 PY
 )
-profile_uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$tmp/profile.plist")
-profiles="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
-mkdir -p "$profiles"
-profile_path="$profiles/$profile_uuid.mobileprovision"
-install -m 600 "$tmp/app.mobileprovision" "$profile_path"
+    profile_uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$tmp/$bundle.plist")
+    profile_path="$profiles/$profile_uuid.mobileprovision"
+    install -m 600 "$tmp/$bundle.mobileprovision" "$profile_path"
+    profile_paths+=("$profile_path")
+}
+install_profile "$bundle_id" APPLE_PROVISIONING_PROFILE_BASE64
+wrapper_profile=$profile_name
+install_profile "$watch_bundle_id" APPLE_WATCH_PROVISIONING_PROFILE_BASE64
+watch_profile=$profile_name
 
 password=$(openssl rand -hex 32)
 security create-keychain -p "$password" "$keychain"
@@ -57,21 +71,25 @@ security import "$tmp/signing.p12" -P "$APPLE_DISTRIBUTION_P12_PASSWORD" -A -t c
 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain"
 security list-keychains -d user -s "$keychain"
 
-xcodegen generate
-xcodebuild -project CronicleWatch.xcodeproj -scheme CronicleWatch -configuration Release \
-    -destination 'generic/platform=watchOS' -archivePath "$tmp/CronicleWatch.xcarchive" \
+cp "$script_dir/distribution.yml" ./testflight-distribution.yml
+xcodegen generate --spec testflight-distribution.yml
+xcodebuild -project CronicleWatch.xcodeproj -scheme CronicleDistribution -configuration Release \
+    -destination 'generic/platform=iOS' -archivePath "$tmp/CronicleWatch.xcarchive" \
     DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Apple Distribution' \
-    PROVISIONING_PROFILE_SPECIFIER="$profile_name" SKIP_INSTALL=NO INSTALL_PATH=/Applications \
+    CRONICLE_WRAPPER_PROFILE="$wrapper_profile" CRONICLE_WATCH_PROFILE="$watch_profile" \
+    MARKETING_VERSION="$version" \
     CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT" archive
 
-app="$tmp/CronicleWatch.xcarchive/Products/Applications/CronicleWatch.app"
+app="$tmp/CronicleWatch.xcarchive/Products/Applications/CronicleDistribution.app"
 /usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app/Info.plist" | grep -Fx "$bundle_id"
 
-python3 - "$tmp/export.plist" "$APPLE_TEAM_ID" "$bundle_id" "$profile_name" <<'PY'
+/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app/Watch/CronicleWatch.app/Info.plist" | grep -Fx "$watch_bundle_id"
+
+python3 - "$tmp/export.plist" "$APPLE_TEAM_ID" "$bundle_id" "$wrapper_profile" "$watch_bundle_id" "$watch_profile" <<'PY'
 import plistlib
 import sys
 
-path, team, bundle, profile = sys.argv[1:]
+path, team, bundle, profile, watch_bundle, watch_profile = sys.argv[1:]
 with open(path, "wb") as f:
     plistlib.dump({
         "method": "app-store-connect",
@@ -79,7 +97,7 @@ with open(path, "wb") as f:
         "signingStyle": "manual",
         "signingCertificate": "Apple Distribution",
         "teamID": team,
-        "provisioningProfiles": {bundle: profile},
+        "provisioningProfiles": {bundle: profile, watch_bundle: watch_profile},
         "manageAppVersionAndBuildNumber": False,
         "testFlightInternalTestingOnly": True,
     }, f)
