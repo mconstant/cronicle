@@ -19,6 +19,8 @@ targets:
         INFOPLIST_KEY_NSMicrophoneUsageDescription: Record a spoken task when you tap Speak.
         INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: Turn your speech into an editable task on this device.
         TARGETED_DEVICE_FAMILY: 1
+        SKIP_INSTALL: NO
+        INSTALL_PATH: /Applications
         SWIFT_VERSION: "5.0"
   CroniclePhoneUITests:
     type: bundle.ui-testing
