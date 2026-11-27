@@ -28,4 +28,43 @@ final class PhoneFlowTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["completed-" + title].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["running-task"].exists)
     }
+
+    func testSpokenTaskCanBeReviewedOrDiscarded() {
+        let app = XCUIApplication()
+        app.launchEnvironment["CRONICLE_TEST_LEDGER"] = UUID().uuidString
+        app.launchEnvironment["CRONICLE_TEST_SPEECH"] = "Collect temperature probes"
+        app.launch()
+
+        app.buttons["speak-task"].tap()
+        let field = app.textFields["task-title"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        XCTAssertEqual(field.value as? String, "Collect temperature probes")
+        app.buttons["Cancel"].tap()
+        XCTAssertFalse(app.buttons["start-Collect temperature probes"].exists)
+
+        app.buttons["speak-task"].tap()
+        XCTAssertTrue(app.buttons["save-task"].waitForExistence(timeout: 5))
+        app.buttons["save-task"].tap()
+        XCTAssertTrue(app.buttons["start-Collect temperature probes"].waitForExistence(timeout: 5))
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Today after voice capture"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
+
+    func testVoiceUnavailableKeepsTypingAvailable() {
+        let app = XCUIApplication()
+        app.launchEnvironment["CRONICLE_TEST_LEDGER"] = UUID().uuidString
+        app.launchEnvironment["CRONICLE_TEST_SPEECH"] = ""
+        app.launch()
+
+        app.buttons["speak-task"].tap()
+        let field = app.textFields["task-title"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Voice access is unavailable. You can still type this task."].exists)
+        field.tap()
+        field.typeText("Check calendar")
+        app.buttons["save-task"].tap()
+        XCTAssertTrue(app.buttons["start-Check calendar"].waitForExistence(timeout: 5))
+    }
 }
