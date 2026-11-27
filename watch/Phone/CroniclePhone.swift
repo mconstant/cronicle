@@ -121,7 +121,13 @@ private struct PhoneHome: View {
             NavigationStack {
                 Form {
                     Section("Task") {
-                        TextField("What do you want to do?", text: $title)
+                        TextField("What do you want to do?", text: Binding(
+                            get: { title },
+                            set: {
+                                speech.stop()
+                                title = $0
+                            }
+                        ))
                             .accessibilityIdentifier("task-title")
                         Button(speech.listening ? "Stop listening" : "Speak", systemImage: speech.listening ? "stop.circle" : "mic") {
                             if speech.listening { speech.stop() }
@@ -136,11 +142,11 @@ private struct PhoneHome: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { capturing = false }
+                        Button("Cancel", action: closeCapture)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Save") {
-                            if update({ $0.add(title) }) { capturing = false }
+                            if update({ $0.add(title) }) { closeCapture() }
                         }
                         .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         .accessibilityIdentifier("save-task")
@@ -161,6 +167,11 @@ private struct PhoneHome: View {
         speech.message = nil
         capturing = true
         if byVoice { startListening() }
+    }
+
+    private func closeCapture() {
+        speech.stop()
+        capturing = false
     }
 
     private func startListening() {

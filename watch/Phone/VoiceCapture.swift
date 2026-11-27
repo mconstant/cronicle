@@ -10,6 +10,7 @@ final class VoiceCapture: ObservableObject {
     private var recognition: SFSpeechRecognitionTask?
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var sessionID = UUID()
+    private var audioActive = false
 
     func start(onTranscript: @escaping (String) -> Void) {
         stop()
@@ -38,8 +39,9 @@ final class VoiceCapture: ObservableObject {
             }
 
             do {
-                try AVAudioSession.sharedInstance().setCategory(.record, mode: .measurement)
+                try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: .allowBluetooth)
                 try AVAudioSession.sharedInstance().setActive(true)
+                audioActive = true
                 let audioRequest = SFSpeechAudioBufferRecognitionRequest()
                 audioRequest.requiresOnDeviceRecognition = true
                 audioRequest.shouldReportPartialResults = true
@@ -92,6 +94,9 @@ final class VoiceCapture: ObservableObject {
         recognition = nil
         listening = false
         message = nil
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        if audioActive {
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            audioActive = false
+        }
     }
 }
