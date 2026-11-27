@@ -19,11 +19,16 @@ Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and t
 Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and track time. Read the README, follow the latest stable release's installation instructions, and enable Developer Mode to continuously capture improvements and generate Markdown development handoffs on request.
 ```
 
-## Apple Watch
+## Apple Watch and iPhone
 
 The [Watch MVP](watch/README.md) captures tasks and tracks one active timer
 offline, with a Focus Brief that can read what’s next aloud. The release
 includes a watchOS simulator build.
+
+The iPhone app works independently. Tap **Speak a task** on Today, edit
+the draft, and save it. Typed tasks, timers, and completion work locally.
+See [TestFlight setup](watch/TESTFLIGHT.md) for signed beta availability
+and [Apple beta acceptance](docs/apple-beta-acceptance.md) for test coverage.
 
 ## Optional Docker setup
 

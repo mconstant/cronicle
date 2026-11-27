@@ -130,4 +130,5 @@ jobs:
             git log --format='### %s%n%nCommit: `%H` · Author: %an%n%n%b' "$range"
           } >> "$RUNNER_TEMP/release-notes.md"
           printf '\n## Apple Watch MVP\n\nFocus Brief shows current and upcoming work offline and can read it aloud. The attached ZIP runs in a watchOS simulator. See [Watch setup](%s/watch/README.md).\n' "$source_url" >> "$RUNNER_TEMP/release-notes.md"
+          printf '\n## iPhone beta source\n\nCronicle for iPhone offers standalone, offline task capture, timers, and a voice draft you can edit before saving. The iPhone simulator acceptance tests cover review, cancellation, typed fallback, and relaunch persistence. See [TestFlight setup](%s/watch/TESTFLIGHT.md) for signed beta availability.\n' "$source_url" >> "$RUNNER_TEMP/release-notes.md"
           gh release create "$GITHUB_REF_NAME" watch-artifacts/cronicle-watch-simulator.zip watch-artifacts/cronicle-watch.png --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md"

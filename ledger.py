@@ -11,7 +11,7 @@ import subprocess
 import sys
 from uuid import UUID, uuid4
 
-VERSION = "v1.3.0"
+VERSION = "v1.4.0"
 REPOSITORY = "https://github.com/mconstant/cronicle"
 
 
