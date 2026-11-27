@@ -7,6 +7,7 @@ final class WatchFlowTests: XCTestCase {
         continueAfterFailure = false
         app.launch()
         let brief = app.descendants(matching: .any)["focus-brief"].firstMatch
+        if !brief.isHittable { app.swipeUp() }
         XCTAssertTrue(brief.waitForExistence(timeout: 10), app.debugDescription)
         brief.tap()
         let next = app.descendants(matching: .any)["brief-next"].firstMatch

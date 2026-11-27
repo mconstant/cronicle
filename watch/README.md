@@ -11,7 +11,7 @@ The main screen puts the active timer first, then open tasks. Completed
 items stay available at the bottom. Controls have text labels and use
 standard watchOS navigation and Dynamic Type.
 
-Tap **Focus Brief** in the toolbar to check what is running, what is next,
+Tap **Focus Brief** below your open tasks to check what is running, what is next,
 and how many tasks are complete. Use **Start next** when no timer is
 running, or **Read aloud** for a spoken recap using watchOS speech
 synthesis. Audio follows the active system route. Headset routing and
