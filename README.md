@@ -103,7 +103,8 @@ work in a new coding-agent session, including by voice.
 
 ## Helper Mode and Developer Mode
 
-Say “Enter Helper Mode” to quietly apply well-supported updates as work
+Helper Mode and Ambient Mode are meant for real-time voice chats. Say
+“Enter Helper Mode” to quietly apply well-supported updates as work
 happens. Ambient Mode holds changes for exit review. Developer Mode is
 independent and keeps improvement observations separate from tasks.
 See the [command guide and Thanksgiving trial](docs/coordination.md).
@@ -116,11 +117,10 @@ requires a v1 image.
 
 ## MVP voice opening
 
-The development skill offers three ways to begin: work on a task now,
-say “Catch up with me” to review work already underway, or say “Enter
-Ambient Mode” to collect possibilities during the session. Catch-up and
-Ambient Mode read back proposed changes for approval before applying
-them. Try this flow with the skill in your development checkout.
+Start by working on a task or saying “Catch me up.” In a real-time voice
+chat, you can also say “Enter Helper Mode” to apply well-supported updates
+as you work, or “Enter Ambient Mode” to review proposed changes when you
+exit. Catch-up and Ambient Mode ask for approval before saving changes.
 
 ## MVP acceptance scenarios
 
@@ -169,8 +169,9 @@ Use disposable test data in a Thanksgiving project.
    Verify Cronicle holds the readings and any suggestions until you
    explicitly exit, then presents them together for review.
 
-7. **Catch up.** Open Cronicle without a request and verify it offers all
-   three ways to begin. Say “Catch me up” and verify it asks what's going
+7. **Catch up.** Open Cronicle without a request and verify it offers task
+   work and catch-up. In real-time voice, verify it also offers Helper
+   Mode and Ambient Mode. Say “Catch me up” and verify it asks what's going
    on today. Start with “I'm working on the turkey.” Give the details in
    response to follow-ups, including that you found the brining bag, still
    need buttermilk and salt before brining, and are walking the dog now.

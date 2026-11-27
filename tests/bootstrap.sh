@@ -9,6 +9,9 @@ standard=${standard%%'## Developer Mode bootstrap'*}
 developer=${notes#*'## Developer Mode bootstrap'}
 grep -Fq 'Export Cronicle' <<< "$chat"
 if grep -Eq 'docker run|ghcr\.io' <<< "$chat"; then exit 1; fi
+for prompt in "$chat" "$standard" "$developer"; do
+    grep -Fq 'real-time voice' <<< "$prompt"
+done
 for prompt in "$standard" "$developer"; do
     grep -Fq "$skill/skills/cronicle/SKILL.md" <<< "$prompt"
     grep -Fq "$image" <<< "$prompt"
