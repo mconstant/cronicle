@@ -8,6 +8,7 @@ struct CroniclePhoneApp: App {
 }
 
 private struct PhoneHome: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var speech = VoiceCapture()
     @State private var ledger: WatchLedger?
     @State private var capturing = false
@@ -120,7 +121,7 @@ private struct PhoneHome: View {
             NavigationStack {
                 Form {
                     Section("Task") {
-                        TextField("What do you want to do?", text: $title, axis: .vertical)
+                        TextField("What do you want to do?", text: $title)
                             .accessibilityIdentifier("task-title")
                         Button(speech.listening ? "Stop listening" : "Speak", systemImage: speech.listening ? "stop.circle" : "mic") {
                             if speech.listening { speech.stop() }
@@ -146,6 +147,9 @@ private struct PhoneHome: View {
                     }
                 }
             }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { speech.stop() }
         }
         .alert("Couldn’t save changes", isPresented: $saveFailed) {
             Button("OK", role: .cancel) {}

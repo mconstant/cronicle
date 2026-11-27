@@ -13,9 +13,16 @@ final class VoiceCapture: ObservableObject {
 
     func start(onTranscript: @escaping (String) -> Void) {
         stop()
+        #if DEBUG
+        if let fixture = ProcessInfo.processInfo.environment["CRONICLE_TEST_SPEECH"] {
+            if fixture.isEmpty { message = "Voice access is unavailable. You can still type this task." }
+            else { onTranscript(fixture) }
+            return
+        }
+        #endif
         let id = sessionID
         Task {
-            let permission = await withCheckedContinuation { continuation in
+            let permission: SFSpeechRecognizerAuthorizationStatus = await withCheckedContinuation { continuation in
                 SFSpeechRecognizer.requestAuthorization { continuation.resume(returning: $0) }
             }
             guard id == sessionID else { return }
