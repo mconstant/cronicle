@@ -38,9 +38,10 @@ final class WatchFlowTests: XCTestCase {
         let next = app.descendants(matching: .any)["brief-next"].firstMatch
         if !next.isHittable { app.swipeUp() }
         XCTAssertEqual(next.label, "Check oven")
-        let switchTimer = app.buttons["Switch timer"]
+        let switchTimer = app.descendants(matching: .any)["brief-start"].firstMatch
         if !switchTimer.isHittable { app.swipeUp() }
         XCTAssertTrue(switchTimer.isHittable, app.debugDescription)
+        XCTAssertEqual(switchTimer.label, "Switch timer")
         switchTimer.tap()
 
         // Then the next task persists as active and the previous task stays open.
