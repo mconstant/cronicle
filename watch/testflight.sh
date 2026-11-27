@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 umask 077
-cd "$(dirname "$0")"
+cd "${1:-$(dirname "$0")}"
 
 required=(APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY APPLE_DISTRIBUTION_P12_BASE64
           APPLE_DISTRIBUTION_P12_PASSWORD APPLE_PROVISIONING_PROFILE_BASE64 GITHUB_RUN_NUMBER GITHUB_RUN_ATTEMPT)
@@ -61,8 +61,11 @@ xcodegen generate
 xcodebuild -project CronicleWatch.xcodeproj -scheme CronicleWatch -configuration Release \
     -destination 'generic/platform=watchOS' -archivePath "$tmp/CronicleWatch.xcarchive" \
     DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY='Apple Distribution' \
-    PROVISIONING_PROFILE_SPECIFIER="$profile_name" \
+    PROVISIONING_PROFILE_SPECIFIER="$profile_name" SKIP_INSTALL=NO INSTALL_PATH=/Applications \
     CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER.$GITHUB_RUN_ATTEMPT" archive
+
+app="$tmp/CronicleWatch.xcarchive/Products/Applications/CronicleWatch.app"
+/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$app/Info.plist" | grep -Fx "$bundle_id"
 
 python3 - "$tmp/export.plist" "$APPLE_TEAM_ID" "$bundle_id" "$profile_name" <<'PY'
 import plistlib
