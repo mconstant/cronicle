@@ -79,6 +79,9 @@ jobs:
         run: |
           sudo xcode-select -s /Applications/Xcode_26.5.app
           brew install xcodegen
+      - name: Test the exact iPhone release source on a simulator
+        if: inputs.product == 'iphone'
+        run: bash release-source/watch/phone-qa.sh
       - name: Archive and upload to internal TestFlight
         env:
           APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
