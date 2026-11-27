@@ -16,6 +16,8 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Cronicle
         INFOPLIST_KEY_WKApplication: YES
         INFOPLIST_KEY_WKWatchOnly: YES
+        SKIP_INSTALL: NO
+        INSTALL_PATH: /Applications
         TARGETED_DEVICE_FAMILY: 4
         SWIFT_VERSION: "5.0"
         MARKETING_VERSION: "1.3.0"
