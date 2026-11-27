@@ -18,12 +18,11 @@ struct FocusBriefView: View {
                     if let next = brief.next {
                         Text(next.title)
                             .accessibilityIdentifier("brief-next")
-                        if brief.running == nil {
-                            Button("Start next", systemImage: "play.fill") {
-                                startNext(next.id)
-                            }
-                            .accessibilityIdentifier("brief-start")
+                        Button(brief.running == nil ? "Start next" : "Switch timer",
+                               systemImage: brief.running == nil ? "play.fill" : "arrow.left.arrow.right") {
+                            startNext(next.id)
                         }
+                        .accessibilityIdentifier("brief-start")
                     } else {
                         Text("No tasks queued")
                     }
