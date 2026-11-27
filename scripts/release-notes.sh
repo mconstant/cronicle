@@ -44,8 +44,9 @@ unavailable, offer the Start in chat prompt or give me the command for a
 persistent Docker host. Show native reports in chat and summarize them in
 voice. Confirm changes and reminders only after successful execution.
 If I haven't given you a task, offer a ready action or ask what I want to
-accomplish today. Offer Helper Mode and Ambient Mode in real-time voice
-chats. In text chat, offer task work or catch-up.
+accomplish today. Tell me directly in the opening message: “Helper Mode and
+Ambient Mode are for real-time voice chats.” In text chat, offer task work
+or catch-up. In real-time voice, also offer both modes.
 NOTES
     if [[ $variant == 'Developer Mode bootstrap' ]]; then
         cat <<'NOTES'
