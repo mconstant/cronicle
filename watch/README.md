@@ -11,7 +11,13 @@ The main screen puts the active timer first, then open tasks. Completed
 items stay available at the bottom. Controls have text labels and use
 standard watchOS navigation and Dynamic Type.
 
-This MVP works offline. The Watch ledger and the Docker ledger are
+Tap **Focus Brief** in the toolbar to check what is running, what is next,
+and how many tasks are complete. Use **Start next** when no timer is
+running, or **Read aloud** for a spoken recap using watchOS speech
+synthesis. Audio follows the active system route. Headset routing and
+offline playback still need a physical Watch test.
+
+This app works offline. The Watch ledger and the Docker ledger are
 separate. Ambient Mode, syncing, and reminders require further work.
 
 ## Try the simulator build
