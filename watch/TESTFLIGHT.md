@@ -58,3 +58,16 @@ delivery to Apple. Processing and tester availability are separate.
 If the upload result is ambiguous, check App Store Connect for the build
 before retrying. The workflow uses a build number derived from the GitHub
 workflow run and attempt.
+
+## Standalone iPhone beta
+
+Register the explicit ID `com.mconstant.cronicle.ios` and create the iOS app
+record in App Store Connect. Create an App Store Connect provisioning profile
+for this ID using the existing Apple Distribution certificate. Set the
+`APPLE_IPHONE_PROVISIONING_PROFILE_BASE64` secret in the same environment.
+Create an internal tester group for the iPhone app and enable automatic
+distribution if desired.
+
+After the tagged release passes iPhone simulator QA, dispatch **TestFlight**
+with that tag and select **iphone**. The Watch upload keeps its existing bundle
+IDs and defaults. Each upload uses its own profile and app record.
