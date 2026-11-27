@@ -13,6 +13,8 @@ releases work independently of Apple credentials.
 2. Create an Apple Distribution certificate, export it with its private key
    as a password-protected `.p12`, and create an App Store Connect
    distribution provisioning profile for that bundle and certificate.
+   Register the embedded Watch app as `com.mconstant.cronicle.watch.watchkitapp`
+   and create a second App Store Connect profile with the same certificate.
 3. In App Store Connect, create an API key for uploading builds. Apple
    allows the Developer role to upload. Use a key scoped to the necessary
    role and retain your own secure copy of the private file.
@@ -28,7 +30,8 @@ Environments**. Add these values in that environment.
 | --- | --- |
 | `APPLE_DISTRIBUTION_P12_BASE64` | Base64 of the exported certificate and private key |
 | `APPLE_DISTRIBUTION_P12_PASSWORD` | Password on that export |
-| `APPLE_PROVISIONING_PROFILE_BASE64` | Base64 of the App Store Connect `.mobileprovision` |
+| `APPLE_PROVISIONING_PROFILE_BASE64` | Base64 of the wrapper App Store Connect `.mobileprovision` |
+| `APPLE_WATCH_PROVISIONING_PROFILE_BASE64` | Base64 of the embedded Watch app App Store Connect `.mobileprovision` |
 | `ASC_PRIVATE_KEY` | Complete App Store Connect `.p8` file, including the header and footer |
 
 | Environment variable | Value |
