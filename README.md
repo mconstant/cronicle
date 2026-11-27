@@ -117,7 +117,9 @@ requires a v1 image.
 
 ## MVP voice opening
 
-Start by working on a task or saying “Catch me up.” In a real-time voice
+Cronicle opens by telling you, “Helper Mode and Ambient Mode are for
+real-time voice chats.” Start by working on a task or saying “Catch me up.”
+In a real-time voice
 chat, you can also say “Enter Helper Mode” to apply well-supported updates
 as you work, or “Enter Ambient Mode” to review proposed changes when you
 exit. Catch-up and Ambient Mode ask for approval before saving changes.
@@ -170,7 +172,8 @@ Use disposable test data in a Thanksgiving project.
    explicitly exit, then presents them together for review.
 
 7. **Catch up.** Open Cronicle without a request and verify it offers task
-   work and catch-up. In real-time voice, verify it also offers Helper
+   work and catch-up and explicitly says both modes are for real-time voice
+   chats. In real-time voice, verify it also offers Helper
    Mode and Ambient Mode. Say “Catch me up” and verify it asks what's going
    on today. Start with “I'm working on the turkey.” Give the details in
    response to follow-ups, including that you found the brining bag, still
