@@ -44,8 +44,10 @@ final class PhoneFlowTests: XCTestCase {
 
         app.buttons["speak-task"].tap()
         XCTAssertTrue(app.buttons["save-task"].waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText(" from the kitchen")
         app.buttons["save-task"].tap()
-        XCTAssertTrue(app.buttons["start-Collect temperature probes"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["start-Collect temperature probes from the kitchen"].waitForExistence(timeout: 5))
         let screenshot = XCTAttachment(screenshot: app.screenshot())
         screenshot.name = "Today after voice capture"
         screenshot.lifetime = .keepAlways
