@@ -1,0 +1,38 @@
+include:
+  - project.yml
+options:
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  CroniclePhone:
+    type: application
+    platform: iOS
+    sources: [Phone, Sources/WatchLedger.swift]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mconstant.cronicle.ios
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Cronicle
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        TARGETED_DEVICE_FAMILY: 1
+        SWIFT_VERSION: "5.0"
+  CroniclePhoneUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [PhoneUITests]
+    dependencies:
+      - target: CroniclePhone
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mconstant.cronicle.ios.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: CroniclePhone
+        SWIFT_VERSION: "5.0"
+schemes:
+  CroniclePhone:
+    build:
+      targets:
+        CroniclePhone: all
+    test:
+      targets: [CroniclePhoneUITests]
