@@ -74,6 +74,12 @@ private struct WatchHome: View {
                             .accessibilityIdentifier("open-task-" + task.title)
                         }
                     }
+                    Section {
+                        Button("Focus Brief", systemImage: "list.bullet.rectangle") {
+                            showingBrief = true
+                        }
+                        .accessibilityIdentifier("focus-brief")
+                    }
                     if ledger.tasks.contains(where: \.done) {
                         Section("Completed") {
                             ForEach(ledger.tasks.filter(\.done)) { task in
@@ -84,17 +90,6 @@ private struct WatchHome: View {
                     }
                 }
                 .navigationTitle("Cronicle")
-                .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            showingBrief = true
-                        } label: {
-                            Label("Focus Brief", systemImage: "list.bullet.rectangle")
-                                .labelStyle(.iconOnly)
-                        }
-                        .accessibilityIdentifier("focus-brief")
-                    }
-                }
                 .sheet(isPresented: $showingBrief) {
                     FocusBriefView(brief: ledger.focusBrief) { id in
                         if update({ $0.start(id, at: .now) }) { showingBrief = false }
