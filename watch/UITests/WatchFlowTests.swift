@@ -20,6 +20,42 @@ final class WatchFlowTests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["stop-timer"].firstMatch.waitForExistence(timeout: 10))
     }
 
+    func testFocusBriefSwitchesRunningTimer() {
+        // Given I have two tasks and the first timer is running.
+        let app = XCUIApplication()
+        app.launchEnvironment["CRONICLE_TEST_LEDGER"] = UUID().uuidString
+        app.launchEnvironment["CRONICLE_TEST_SECOND_TASK"] = "1"
+        continueAfterFailure = false
+        app.launch()
+        app.descendants(matching: .any)["open-task-Collect probes"].firstMatch.tap()
+        app.buttons["Start timer"].tap()
+
+        // When I open the brief and switch to the next task.
+        let brief = app.descendants(matching: .any)["focus-brief"].firstMatch
+        for _ in 0..<3 where !brief.isHittable { app.swipeUp() }
+        XCTAssertTrue(brief.isHittable, app.debugDescription)
+        brief.tap()
+        let next = app.descendants(matching: .any)["brief-next"].firstMatch
+        if !next.isHittable { app.swipeUp() }
+        XCTAssertEqual(next.label, "Check oven")
+        let switchTimer = app.buttons["Switch timer"]
+        if !switchTimer.isHittable { app.swipeUp() }
+        XCTAssertTrue(switchTimer.isHittable, app.debugDescription)
+        switchTimer.tap()
+
+        // Then the next task persists as active and the previous task stays open.
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Check oven"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.descendants(matching: .any)["stop-timer"].firstMatch.exists)
+        let previous = app.descendants(matching: .any)["open-task-Collect probes"].firstMatch
+        if !previous.isHittable { app.swipeUp() }
+        XCTAssertTrue(previous.isHittable)
+        previous.tap()
+        let time = app.descendants(matching: .any)["task-time-spent"].firstMatch
+        XCTAssertTrue(time.waitForExistence(timeout: 5))
+    }
+
     func testTimerAndCompletionSurviveRelaunch() {
         let app = XCUIApplication()
         app.launchEnvironment["CRONICLE_TEST_LEDGER"] = UUID().uuidString

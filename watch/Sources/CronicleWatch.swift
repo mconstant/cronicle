@@ -25,6 +25,9 @@ private struct WatchHome: View {
             if defaults.data(forKey: key) == nil {
                 var fixture = WatchLedger()
                 fixture.add("Collect probes")
+                if ProcessInfo.processInfo.environment["CRONICLE_TEST_SECOND_TASK"] == "1" {
+                    fixture.add("Check oven")
+                }
                 defaults.set(try? JSONEncoder().encode(fixture), forKey: key)
             }
         }
@@ -113,6 +116,7 @@ private struct WatchHome: View {
                 if task.seconds > 0 {
                     Text(Duration.seconds(task.seconds).formatted(.units(allowed: [.hours, .minutes, .seconds], width: .abbreviated)))
                         .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("task-time-spent")
                 }
                 if !task.done {
                     Button(ledger?.active == nil ? "Start timer" : "Switch timer", systemImage: "play.fill") {
