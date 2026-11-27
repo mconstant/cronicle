@@ -62,7 +62,7 @@ jobs:
           ref: ${{ needs.validate.outputs.sha }}
           path: release-source
           persist-credentials: false
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af683 # v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ github.workflow_sha }}
           path: release-workflow
