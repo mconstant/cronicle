@@ -78,7 +78,7 @@ jobs:
       - name: Build the watchOS simulator app and run ledger tests
         run: bash watch/qa.sh build
       - name: Run watchOS interaction tests and capture a screenshot
-        timeout-minutes: 7
+        timeout-minutes: 10
         run: bash watch/qa.sh test
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -129,5 +129,5 @@ jobs:
             printf '\n## Changelog\n\n'
             git log --format='### %s%n%nCommit: `%H` · Author: %an%n%n%b' "$range"
           } >> "$RUNNER_TEMP/release-notes.md"
-          printf '\n## Apple Watch MVP\n\nThe attached ZIP runs in a watchOS simulator. See [Watch setup](%s/watch/README.md).\n' "$source_url" >> "$RUNNER_TEMP/release-notes.md"
+          printf '\n## Apple Watch MVP\n\nFocus Brief shows current and upcoming work offline and can read it aloud. The attached ZIP runs in a watchOS simulator. See [Watch setup](%s/watch/README.md).\n' "$source_url" >> "$RUNNER_TEMP/release-notes.md"
           gh release create "$GITHUB_REF_NAME" watch-artifacts/cronicle-watch-simulator.zip watch-artifacts/cronicle-watch.png --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md"

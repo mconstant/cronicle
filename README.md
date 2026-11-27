@@ -22,7 +22,8 @@ Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and t
 ## Apple Watch
 
 The [Watch MVP](watch/README.md) captures tasks and tracks one active timer
-offline. The release includes a watchOS simulator build.
+offline, with a Focus Brief that can read what’s next aloud. The release
+includes a watchOS simulator build.
 
 ## Optional Docker setup
 
