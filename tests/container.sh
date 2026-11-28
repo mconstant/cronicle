@@ -32,7 +32,8 @@ run task project:Thanksgiving ready | grep -F 'Make gravy'
 run timew track 2020-01-02T10:00:00Z to 2020-01-02T10:30:00Z Thanksgiving 'Make gravy'
 run timew export :all Thanksgiving |
     python3 -c 'import json, sys; from datetime import datetime; rows = json.load(sys.stdin); assert any("Make gravy" in row["tags"] and (datetime.strptime(row["end"], "%Y%m%dT%H%M%SZ") - datetime.strptime(row["start"], "%Y%m%dT%H%M%SZ")).total_seconds() == 1800 for row in rows)'
-docker run --rm -i -e CRONICLE_LEDGER=/usr/local/lib/cronicle/ledger.py "$image" python3 - < tests/ledger.py
+docker run --rm -i -v "$PWD/tests/fixtures:/fixtures:ro" -e CRONICLE_FIXTURES=/fixtures \
+    -e CRONICLE_LEDGER=/usr/local/lib/cronicle/ledger.py "$image" python3 - < tests/ledger.py
 
 previous=ghcr.io/mconstant/cronicle-cli@sha256:140df5d35f1c6676f5ca79714f43d40914a0554afe42f2ea1668adbe1ecc6f15
 migration_volume=$(docker volume create)

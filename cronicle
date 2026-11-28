@@ -14,7 +14,7 @@ if [ ! -e "$HOME/.timewarrior/timewarrior.cfg" ]; then
 fi
 
 case "${1:-}" in
-    --help|--version|report|handoff|observe|observation|task-upsert|task-meta|activity|reminder)
+    --help|--version|report|handoff|observe|observation|task-upsert|task-meta|activity|reminder|work|status)
         exec python3 /usr/local/lib/cronicle/ledger.py "$@"
         ;;
     '')

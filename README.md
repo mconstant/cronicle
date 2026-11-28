@@ -10,14 +10,22 @@ It includes the full instructions and keeps tasks in the conversation. Say
 **Standard**
 
 ```text
-Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and track time. Read the README and follow the latest stable release's installation and skill instructions.
+Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and track time. Read the README and follow the latest stable release's installation and skill instructions. Tell me the execution tier and where my tasks are stored.
 ```
 
 **Developer Mode**
 
 ```text
-Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and track time. Read the README, follow the latest stable release's installation instructions, and enable Developer Mode to continuously capture improvements and generate Markdown development handoffs on request.
+Use Cronicle from https://github.com/mconstant/cronicle to manage my tasks and track time. Read the README, follow the latest stable release's installation instructions, tell me the execution tier and where my tasks are stored, and enable Developer Mode to continuously capture improvements and generate Markdown development handoffs on request.
 ```
+
+## Execution and portability
+
+Ask **Cronicle status** to see what is running and where work is saved.
+The executable tier provides [daily reports, provenance, and opt-in milestone
+tracking](docs/execution-contract.md). In chat-only use, export a snapshot to
+take your work with you. See the [capability matrix](docs/capabilities.md)
+for verified support and platform limits.
 
 ## Apple Watch and iPhone
 

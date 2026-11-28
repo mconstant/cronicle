@@ -1,0 +1,11 @@
+{
+  "id": "independent-91",
+  "title": "Independent Research",
+  "total": 91,
+  "expected_minutes": [180, 300],
+  "currency": "USD",
+  "milestones": [
+    {"target": 40, "amount_minor": 10000},
+    {"target": 91, "amount_minor": 10000}
+  ]
+}

@@ -20,7 +20,7 @@ targets:
         INSTALL_PATH: /Applications
         TARGETED_DEVICE_FAMILY: 4
         SWIFT_VERSION: "5.0"
-        MARKETING_VERSION: "1.4.0"
+        MARKETING_VERSION: "1.5.0"
         CURRENT_PROJECT_VERSION: 1
   CronicleWatchUITests:
     type: bundle.ui-testing
