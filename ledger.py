@@ -1,7 +1,7 @@
 """Cronicle coordination metadata. Taskwarrior and Timewarrior retain their own data."""
 import argparse
 from contextlib import closing
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 import json
 import os
 from pathlib import Path
@@ -11,7 +11,7 @@ import subprocess
 import sys
 from uuid import UUID, uuid4
 
-VERSION = "v1.4.0"
+VERSION = "v1.5.0"
 REPOSITORY = "https://github.com/mconstant/cronicle"
 
 
@@ -89,7 +89,7 @@ def task_metadata(db, data):
 
 
 def upsert_task(data):
-    fields(data, "id title project due depends status")
+    fields(data, "id title project due depends status priority wait")
     if "id" in data:
         key = str(UUID(data["id"]))
         existing = export_tasks(key)
@@ -131,7 +131,9 @@ def upsert_task(data):
 def task_attributes(data):
     if "status" in data:
         choice(data["status"], "pending completed")
-    attrs = [f"{key}:{data[key]}" for key in ("project", "due") if key in data]
+    if "priority" in data:
+        require(data["priority"] in ("", "H", "M", "L"), "Expected priority H, M, L, or empty.")
+    attrs = [f"{key}:{data[key]}" for key in ("project", "due", "priority", "wait") if key in data]
     if "depends" in data:
         attrs.append("depends:" + ",".join(str(UUID(value)) for value in data["depends"]))
     return attrs
@@ -171,9 +173,10 @@ def edit_observation(db, data):
 
 
 def activity(db, data):
-    fields(data, "id title kind state start end owner task")
+    fields(data, "id title kind state start end owner task start_source end_source")
     key = data.get("id") or str(uuid4())
-    row = dict(id=key, start=None, end=None, state="active") | get(db, "activity", key) | (data | {"id": key})
+    existing = get(db, "activity", key)
+    row = dict(id=key, start=None, end=None, state="active") | existing | (data | {"id": key})
     choice(row["kind"], "waiting elapsed delegated personal-unknown")
     require(row["title"].strip(), "Activity title is required.")
     choice(row["state"], "active ended")
@@ -182,6 +185,15 @@ def activity(db, data):
     require(not (start and end and end < start), "End precedes start.")
     require(not (row["kind"] == "personal-unknown" and start and end),
             "Use Timewarrior for known personal intervals.")
+    for boundary in ("start", "end"):
+        source = boundary + "_source"
+        if boundary in data and data[boundary] != existing.get(boundary) and source not in data:
+            row.pop(source, None)
+        if row[boundary] is None:
+            require(data.get(source, "unknown") == "unknown", "A timestamp source requires a timestamp.")
+            row[source] = "unknown"
+        else:
+            row[source] = choice(row.get(source, "unclassified"), "reported estimated unclassified")
     row["duration_seconds"] = (end - start).total_seconds() if start and end else None
     return save(db, "activity", key, row)
 
@@ -205,8 +217,205 @@ def reminder(db, data):
     return save(db, "reminder", key, data | {"id": key, "status": "scheduled"})
 
 
+FEATURE_FLAGS = {"independent_work": "CRONICLE_FEATURE_INDEPENDENT_WORK"}
+
+
+def feature_setting(name):
+    setting = os.environ.get(FEATURE_FLAGS[name], "off").casefold()
+    return setting if setting in {"on", "off"} else "invalid"
+
+
+def feature_enabled(name):
+    return feature_setting(name) == "on"
+
+
+def work(db, data):
+    require(feature_enabled("independent_work"),
+            "Independent work writes are disabled. Set CRONICLE_FEATURE_INDEPENDENT_WORK=on to enable them.")
+    key = data["id"]
+    require(isinstance(key, str) and re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}", key),
+            "Supply a stable work ID.")
+    row = get(db, "work", key)
+    if "title" in data:
+        fields(data, "id title total expected_minutes currency milestones")
+        fields_set = set("id title total expected_minutes currency milestones".split())
+        require(data.keys() == fields_set, "Provide the full administrative work definition.")
+        title, total, minutes, currency, milestones = (data[field] for field in
+            ("title", "total", "expected_minutes", "currency", "milestones"))
+        require(isinstance(title, str) and 0 < len(title.strip()) <= 120 and "\n" not in title,
+                "Provide a single-line administrative title of at most 120 characters.")
+        require(type(total) is int and total > 0, "Total must be a positive item count.")
+        require(isinstance(minutes, list) and len(minutes) == 2
+                and all(type(value) is int for value in minutes) and 0 < minutes[0] <= minutes[1],
+                "Expected minutes must be an ordered pair of positive integers.")
+        require(isinstance(currency, str) and re.fullmatch(r"[A-Z]{3}", currency),
+                "Supply a three-letter currency code.")
+        require(isinstance(milestones, list), "Expected a milestone array.")
+        previous = 0
+        for milestone in milestones:
+            require(isinstance(milestone, dict) and milestone.keys() == {"target", "amount_minor"},
+                    "Milestones contain target and amount_minor only.")
+            target, amount = milestone["target"], milestone["amount_minor"]
+            require(type(target) is int and previous < target <= total and type(amount) is int and amount >= 0,
+                    "Milestone targets must increase and amounts must be nonnegative minor units.")
+            previous = target
+        if row:
+            require(all(row[field] == data[field] for field in fields_set),
+                    "This work ID already has a different definition.")
+            return row
+        row = data | {"completed": 0}
+    else:
+        fields(data, "id completed correction")
+        require(row, "Unknown work ID.")
+        count = data["completed"]
+        correction = data.get("correction", False)
+        require(type(count) is int and 0 <= count <= row["total"], "Completed count is outside the work total.")
+        require(type(correction) is bool, "Correction must be true or false.")
+        require(count >= row["completed"] or correction, "A decrease requires an explicit correction.")
+        if count == row["completed"]:
+            return row
+        row["completed"] = count
+    row["remaining"] = row["total"] - row["completed"]
+    row["reached_amount_minor"] = sum(m["amount_minor"] for m in row["milestones"]
+                                      if m["target"] <= row["completed"])
+    return save(db, "work", key, row)
+
+
+def executable_status(path):
+    components = {}
+    for name, executable in (("taskwarrior", "task"), ("timewarrior", "timew")):
+        try:
+            result = subprocess.run([executable, "--version"], text=True, capture_output=True,
+                                    timeout=5, check=True)
+            components[name] = {"available": True, "version": result.stdout.strip().splitlines()[0]
+                                if result.stdout.strip() else None}
+        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            components[name] = {"available": False, "version": None}
+    task_location = os.environ.get("TASKDATA")
+    if components["taskwarrior"]["available"] and task_location is None:
+        try:
+            task_location = subprocess.check_output(["task", "_get", "rc.data.location"],
+                                                    text=True, stderr=subprocess.DEVNULL, timeout=5).strip() or None
+        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            pass
+    return {
+        "schema_version": 1, "version": VERSION, "execution_tier": "executable",
+        "components": {"cronicle": {"available": True, "version": VERSION}, **components},
+        "state": {
+            "coordination": {"backend": "sqlite", "location": str(path.resolve())},
+            "tasks": {"backend": "taskwarrior", "location": task_location,
+                      "configuration": os.environ.get("TASKRC", str(Path.home() / ".taskrc"))},
+            "time": {"backend": "timewarrior", "location": os.environ.get("TIMEWARRIORDB")},
+            "session_end": "Data remains on disk. Ending a chat does not stop an active timer.",
+        },
+        "feature_flags": {name: {"enabled": feature_enabled(name), "setting": env,
+                                 "value": feature_setting(name)} for name, env in FEATURE_FLAGS.items()},
+        "host_capabilities": dict.fromkeys(("speech", "notifications", "live_turns", "barge_in"), "not_probed"),
+        "timestamp_policy": {"engine_clock": "system clock", "native_history": "unclassified",
+                             "explicit_input": ["reported", "estimated", "unknown", "unclassified"]},
+        "provenance": {"status": "executable", "task_and_time_probe": "version_command",
+                       "skill": "not_probed", "inference": "outside_engine"},
+    }
+
+
+def time_intervals():
+    return json.loads(subprocess.check_output(["timew", "export", ":all"], text=True))
+
+
+def daily_report(db, day):
+    now = datetime.now(timezone.utc)
+    selected = date.fromisoformat(day) if day is not None else now.date()
+    start = datetime.combine(selected, datetime.min.time(), tzinfo=timezone.utc)
+    end = start + timedelta(days=1)
+    intervals = []
+    closed = []
+    for raw in time_intervals():
+        beginning = moment(raw["start"])
+        finish = moment(raw["end"]) if raw.get("end") else None
+        if beginning >= end or (finish is not None and finish <= start):
+            continue
+        if finish is not None and beginning < finish:
+            closed.append((max(beginning, start), min(finish, end)))
+        intervals.append({"start": beginning.isoformat(), "end": finish.isoformat() if finish else None,
+                          "start_source": "unclassified", "end_source": "unclassified" if finish else "unknown",
+                          "source": "timewarrior", "tags": raw.get("tags", [])})
+
+    seconds = 0
+    covered_until = start
+    for beginning, finish in sorted(closed):
+        seconds += max(0, (finish - max(covered_until, beginning)).total_seconds())
+        covered_until = max(finish, covered_until)
+
+    rows = [row | {"coordination": get(db, "task", row["uuid"])} for row in export_tasks()]
+    active = export_tasks("+ACTIVE")
+    active_ids = {row["uuid"] for row in active}
+    ready = {row["uuid"] for row in export_tasks("+READY")} - active_ids
+    blocked = {row["uuid"] for row in export_tasks("+BLOCKED")}
+    tasks = {kind: [] for kind in ("ready", "blocked", "deferred", "completed")}
+    for row in rows:
+        meta = row["coordination"]
+        if row["status"] == "completed":
+            completed_at = row.get("end")
+            if completed_at and start <= moment(completed_at) < end:
+                tasks["completed"].append(row)
+        elif row["status"] in {"pending", "waiting"}:
+            if (meta.get("condition_state") in {"unresolved", "declined"} or row["status"] == "waiting"
+                    or (row.get("wait") and moment(row["wait"]) > now)):
+                tasks["deferred"].append(row)
+            elif row["uuid"] in blocked:
+                tasks["blocked"].append(row)
+            elif (row["uuid"] in ready and meta.get("ownership") != "other"
+                  and meta.get("delegation") not in {"pending", "accepted", "completed"}):
+                tasks["ready"].append(row)
+    priority_order = {"H": 0, "M": 1, "L": 2}
+    tasks["ready"].sort(key=lambda row: (priority_order.get(row.get("priority"), 3),
+                                         row.get("due", "~"), row["uuid"]))
+    passive = []
+    for row in records(db, "activity"):
+        beginning = moment(row["start"]) if row.get("start") else None
+        finish = moment(row["end"]) if row.get("end") else None
+        if (beginning is None or beginning < end) and (finish is None or finish > start):
+            passive.append({"start_source": "unclassified" if beginning else "unknown",
+                            "end_source": "unclassified" if finish else "unknown"} | row)
+    return {
+        "schema_version": 1, "version": VERSION, "execution_tier": "executable",
+        "window": {"start": start.isoformat(), "end_exclusive": end.isoformat(), "timezone": "UTC"},
+        "current_activity": {"tasks": active,
+                             "open_intervals": [item for item in intervals if item["end"] is None]},
+        "tasks": tasks, "passive_activities": passive, "independent_work": records(db, "work"),
+        "personal_time": {"closed_seconds": int(seconds), "intervals": intervals,
+                          "calculation": "union_of_closed_timewarrior_intervals_clipped_to_window"},
+        "untracked_intervals": None,
+        "provenance": {"tasks": "taskwarrior", "personal_time": "timewarrior",
+                       "activities_and_progress": "sqlite", "calculations": "cronicle_executable",
+                       "task_readiness": "current_snapshot",
+                       "untracked_intervals": "unknown_without_an_explicit_coverage_window"},
+    }
+
+
+def render_daily(report):
+    print(f"Cronicle {report['window']['start'][:10]} UTC · executable")
+    titles = lambda rows: ", ".join(" ".join(row["description"].split()) for row in rows) or "none"
+    print("Current:", titles(report["current_activity"]["tasks"]))
+    for kind, rows in report["tasks"].items():
+        print(f"{kind.capitalize()}:", titles(rows))
+    seconds = report["personal_time"]["closed_seconds"]
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    print(f"Closed recorded time: {hours:d}:{minutes:02d}:{seconds:02d}")
+    print(f"Open intervals: {len(report['current_activity']['open_intervals'])}")
+    print(f"Separate activity records: {len(report['passive_activities'])}")
+    for row in report["independent_work"]:
+        print(f"{row['title']}: {row['completed']}/{row['total']} complete")
+    print("Timewarrior boundary origin: unclassified. Untracked time: unknown.")
+
+
 def report(db, args):
     kind = args.kind
+    if kind == "daily":
+        return daily_report(db, args.day)
+    if kind == "work":
+        return records(db, "work")
     if kind in {"improvements", "unresolved"}:
         return [r for r in records(db, "observation") if
                 (kind != "unresolved" or r["status"] == "open")
@@ -218,7 +427,7 @@ def report(db, args):
                 and (not args.active or r["status"] == "scheduled")
                 and (not args.reconcile or (r["task"] in completed and r["status"] == "scheduled"))]
     if kind == "time":
-        return json.loads(subprocess.check_output(["timew", "export", ":all"], text=True))
+        return time_intervals()
     if kind == "activity":
         return {"personal": [r for r in export_tasks("+ACTIVE")],
                 "parallel": [r for r in records(db, "activity") if r["state"] == "active"]}
@@ -287,12 +496,15 @@ def main():
     parser.add_argument("--version", action="version", version=VERSION)
     commands = parser.add_subparsers(dest="command", required=True)
     mutations = {"task-upsert": lambda db, data: upsert_task(data), "task-meta": task_metadata,
-                 "observe": observe, "observation": edit_observation, "activity": activity, "reminder": reminder}
+                 "observe": observe, "observation": edit_observation, "activity": activity, "reminder": reminder, "work": work}
     for command in mutations:
         commands.add_parser(command).add_argument("json")
+    commands.add_parser("status")
     reports = commands.add_parser("report")
-    reports.add_argument("kind", choices="all team personal conditional delegated unassigned upcoming overdue completed deferred activity time improvements unresolved reminders".split())
+    reports.add_argument("kind", choices="all team personal conditional delegated unassigned upcoming overdue completed deferred activity time improvements unresolved reminders daily work".split())
     reports.add_argument("--release")
+    reports.add_argument("--format", choices=["json", "text"], default="json")
+    reports.add_argument("--day", help="UTC date for report daily (YYYY-MM-DD)")
     reports.add_argument("--task")
     reports.add_argument("--active", action="store_true")
     reports.add_argument("--reconcile", action="store_true")
@@ -301,6 +513,9 @@ def main():
     output.add_argument("--release")
     args = parser.parse_args()
     path = Path(os.environ.get("CRONICLE_DATA", Path.home())) / ".cronicle.sqlite3"
+    if args.command == "status":
+        print(json.dumps(executable_status(path)))
+        return
     os.umask(0o077)
     with closing(sqlite3.connect(path, timeout=15)) as db, db:
         db.execute("CREATE TABLE IF NOT EXISTS records (kind TEXT, id TEXT, data TEXT NOT NULL, PRIMARY KEY (kind, id))")
@@ -312,7 +527,13 @@ def main():
             db.commit()
             print(json.dumps(result))
         elif args.command == "report":
-            print(json.dumps(report(db, args)))
+            require(args.kind == "daily" or (args.day is None and args.format == "json"),
+                    "--day and text rendering are available for report daily.")
+            result = report(db, args)
+            if args.format == "text":
+                render_daily(result)
+            else:
+                print(json.dumps(result))
         else:
             handoff(db, args.release)
 

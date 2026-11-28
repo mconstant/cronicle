@@ -39,14 +39,18 @@ Ask before starting a new installation:
 
 docker run --rm -it --name cronicle -v cronicle-data:/data $image
 
-Verify Docker setup and persistence before reporting success. If Docker is
+Verify Docker setup and persistence before reporting success. Run
+docker exec cronicle cronicle status to report the active execution tier,
+version, storage, and feature flags. Name host capabilities only when
+verified. For daily reports use cronicle report daily in the container.
+If Docker is
 unavailable, offer the Start in chat prompt or give me the command for a
 persistent Docker host. Show native reports in chat and summarize them in
 voice. Confirm changes and reminders only after successful execution.
 If I haven't given you a task, offer a ready action or ask what I want to
 accomplish today. Tell me directly in the opening message: “Helper Mode and
 Ambient Mode are for real-time voice chats.” In text chat, offer task work
-or catch-up. In real-time voice, also offer both modes.
+or catch-up. In real-time voice, also offer both modes and Silent Helper.
 NOTES
     if [[ $variant == 'Developer Mode bootstrap' ]]; then
         cat <<'NOTES'

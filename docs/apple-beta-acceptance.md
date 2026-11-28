@@ -18,3 +18,19 @@ something off. Both experiences keep core task actions available offline.
 The simulator speech fixture exercises UI and save behavior. It cannot establish
 microphone permission handling, offline recognition availability, audio routing,
 or Bluetooth behavior on actual hardware.
+
+## Watch voice-session design
+
+The Watch is a first-class voice interface. Its display gives the user a
+glanceable view of the session and a way to act when speaking is inconvenient.
+Use the Digital Crown for browsing and selection, with touch and VoiceOver
+equivalents. Keep the Crown's press behavior available to watchOS.
+
+| Given | When | Then |
+| --- | --- | --- |
+| No voice session is active | I open Cronicle on the Watch | Helper and Ambient are reachable immediately, and I can turn the Crown to browse modes and task controls |
+| A voice session is active | I glance at the Watch | The display shows the mode, actual microphone state, and any connection issue. Stop is accessible from the session screen |
+| Ambient has proposed changes | I stop listening and rotate the Crown | I can move one item at a time, see which item has focus, and choose which changes to approve |
+| Helper detects clear task updates | I glance at the Watch | I can see the latest saved action without a spoken acknowledgment for every update |
+| I scroll, turn the Crown, or change the selected item | I have yet to confirm an action | The app leaves the microphone and task ledger in their current states |
+| My paired iPhone is handling speech | Its audio session stops or the connection drops | The Watch shows the changed state promptly and gives me a way to recover |

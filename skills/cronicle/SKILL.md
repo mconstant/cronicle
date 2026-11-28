@@ -304,3 +304,54 @@ The Taskwarrior hook supplies the project tag for tracked tasks. If the
 user forgot to track an interval, clarify when it happened, check for
 overlap, and use `timew track` with the task description and project tags.
 Verify the report afterward. Backfilling time leaves task status as-is.
+
+## Execution status
+
+Probe the existing container with `docker exec cronicle cronicle status`
+before claiming executable-tier behavior. On “Cronicle status,” give the
+version, observed components and feature flags, storage, what survives the
+session, and host capabilities you have actually verified. A version probe
+indicates an executable responds. A failed operation still needs to be
+reported. If the probe fails, explain the failure and label any chat-only
+fallback as conversational, with session-local state and inferred calculations.
+Do not infer reminder, persistent storage, or audio capabilities from the host
+name. Distinguish proposals, user reports, and successful write receipts.
+
+Use `docker exec cronicle cronicle report daily` as the canonical daily
+report. Read its UTC window and provenance. The engine calculates the union
+of closed recorded personal intervals. Open timers, passive elapsed time,
+and estimates stay separate. Timewarrior history does not establish whether
+a boundary was measured or backfilled. Preserve reported, estimated, and
+unknown labels. Never infer work outside recorded intervals.
+
+## Silent Helper and Independent Human Work
+
+Enter Silent Helper only on an explicit request in a real-time voice session.
+Stay quiet for ordinary background speech, partial utterances, tentative
+intentions, and routine successful updates. Use a non-spoken no-op if the
+host supports it. If the host must produce a response, use its least
+intrusive response. The host controls speech delivery, real-time audio,
+barge-in, and whether a turn can be silent. Interrupt only for a meaningful,
+time-sensitive issue when the host and the user's preferences allow it.
+
+When the user designates Independent Human Work, track only administrative
+facts such as item counts, milestones, expected effort, and compensation
+terms. This restriction survives interruptions and mode changes until the
+user explicitly ends Independent Human Work. Decline requests to research,
+solve, evaluate, or write substantive answers for the assignment. Do not
+capture assignment content or assume a spoken intention was completed.
+Separate reached milestone amounts from payment actually received.
+
+Use a confirmed absolute completed count. Repeating it leaves progress
+unchanged. An explicit correction may lower the count and recalculate which
+milestones are reached. A note about future work leaves the current timer
+unchanged. On explicit request or mode exit, summarize verified progress,
+current work, and unresolved changes briefly.
+
+Execute Silent Helper's authorized mutations through the ordinary commands.
+Use `cronicle work '<JSON>'` for Independent Human Work if status shows
+`independent_work.enabled`. See
+[the execution contract](../../docs/execution-contract.md) for payloads.
+Read back `cronicle report work` on request. A disabled flag or a failed
+write means the count was not saved. Keep a proposed update explicitly
+unsaved and disclose it at the next appropriate check-in.

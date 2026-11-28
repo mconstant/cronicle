@@ -8,6 +8,8 @@ standard=${notes#*'## Standard bootstrap'}
 standard=${standard%%'## Developer Mode bootstrap'*}
 developer=${notes#*'## Developer Mode bootstrap'}
 grep -Fq 'Export Cronicle' <<< "$chat"
+grep -Fq 'Conversational tier. State is in this chat' <<< "$chat"
+grep -Fq 'Independent Human Work' <<< "$chat"
 if grep -Eq 'docker run|ghcr\.io' <<< "$chat"; then exit 1; fi
 for prompt in "$chat" "$standard" "$developer"; do
     grep -Fq 'Helper Mode and Ambient Mode are for real-time voice chats.' <<< "$(tr '\n' ' ' <<< "$prompt")"
@@ -17,6 +19,8 @@ for prompt in "$standard" "$developer"; do
     grep -Fq "$image" <<< "$prompt"
     grep -Fq 'cronicle-data:/data' <<< "$prompt"
     grep -Fq 'Verify Docker setup' <<< "$prompt"
+    grep -Fq 'docker exec cronicle cronicle status' <<< "$prompt"
+    grep -Fq 'Silent Helper' <<< "$prompt"
 done
 grep -Fq 'Enable Developer Mode' <<< "$developer"
 if bash scripts/release-notes.sh v1.0.0 "$skill" latest >/dev/null 2>&1; then exit 1; fi
